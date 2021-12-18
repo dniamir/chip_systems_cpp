@@ -1,14 +1,17 @@
 # include <icm20649.h>
-# include <i2c.h>
+# include <Arduino.h>
+# include <arduino_i2c.h>
 
-ICM20649::ICM20649() {
-}
+ICM20649::ICM20649(ArduinoI2C &comm_protocol){
+
+    // static Protocol comm_protocol = comm_protocol;
+
+};
 
 bool ICM20649::initialize(void) {
-    Wire.begin();
 
     // Check device_id
-    uint8_t icm_check = i2c_read(0x68, 0x00);
+    uint8_t icm_check = comm_protocol.read_register(0x68, 0x00);
 
     bool icm_ok = false;
 

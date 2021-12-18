@@ -1,6 +1,5 @@
 # include <Adafruit_GPS.h>
 # include <CDPA1616S.h>
-# include <i2c.h>
 
 // what's the name of the hardware serial port?
 #define GPSSerial Serial1
@@ -35,6 +34,8 @@ bool CDPA1616S::initialize(void) {
 
     // Ask for firmware version
     GPSSerial.println(PMTK_Q_RELEASE);
+
+    return true;
 
 }
 
