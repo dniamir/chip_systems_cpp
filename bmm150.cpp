@@ -2,20 +2,14 @@
 # include <arduino_i2c.h>
 # include <Arduino.h>
 
-int TwosComp(int decimal, int bits=8) {
-
-    // If MSB is 1
-    if ((decimal & (1 << (bits - 1))) != 0) {
-        decimal = decimal - (1 << bits);
-    }  
-	return decimal;
-}
-
-BMM150::BMM150(ArduinoI2C input_protocol){
-
-    // static Protocol comm_protocol = comm_protocol;
-    comm_protocol = input_protocol;
-
+BMM150::BMM150(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address_in, input_protocol) {
+    Chip::field_map = field_map;
+    Chip::who_am_i_reg = who_am_i_reg;
+};
+BMM150::BMM150(ArduinoI2C input_protocol) : Chip(input_protocol){
+    Chip::field_map = field_map;
+    Chip::who_am_i_reg = who_am_i_reg;
+    Chip::i2c_address = i2c_address;
 };
 
 bool BMM150::initialize(void) {
@@ -37,8 +31,6 @@ bool BMM150::initialize(void) {
         Serial.println("BMM connection was NOT successful");
         bmm_ok = false;
     }
-
-    read_trim_registers();
 
     return bmm_ok;
 }
@@ -63,116 +55,10 @@ void BMM150::default_mode(void) {
     write_field("Channel Z", 0);
 }
 
-void BMM150::write_field(String field, int field_val) {
-
-    // Check register map for register
-    Field field_to_write = field_map[field];
-    write_field(field_to_write.address, field_val, field_to_write.offset, field_to_write.length);
-}
-
-void BMM150::write_field(int field, int field_val, int offset, int field_length) {
-
-    // Do masking if this is a true field and not a register
-    // Serial.println();
-    // Serial.println("Write Field");
-    // Serial.print("Field: ");
-    // Serial.println(field);
-    // Serial.print("field_val: ");
-    // Serial.println(field_val);
-    // Serial.print("offset: ");
-    // Serial.println(offset);
-    // Serial.print("field_length: ");
-    // Serial.println(field_length);
-
-    if (field_length != 8) {
-        int curr_field_val = read_field(field);
-
-        // Serial.print("curr_field_val: ");
-        // Serial.println(curr_field_val);
-
-        // Zero-ing mask
-        int mask1 = pow(2, field_length) - 1;
-        mask1 = mask1 << offset;
-        mask1 = 0b11111111 - mask1;
-
-        // Serial.print("mask1: ");
-        // Serial.println(mask1);
-
-        // Mask adding actual field_val
-        int mask2 = field_val << offset;
-
-        // Serial.print("mask2: ");
-        // Serial.println(mask2);
-        
-        // Final masking
-        field_val = (curr_field_val & mask1) | mask2;
-
-        // Serial.print("field_val: ");
-        // Serial.println(field_val);
-        // Serial.println();
-    }
-
-    write_field(field, field_val);
-}
-
-void BMM150::write_field(int field, int field_val) {
-
-    comm_protocol.write_register(i2c_address, field, field_val);
-}
-
-int BMM150::read_field(String field) {
-    Field field_to_write = field_map[field];
-    return(read_field(field_to_write.address, field_to_write.offset, field_to_write.length));
-}
-
-int BMM150::read_field(int field, int offset, int field_length) {
-
-    int field_out = read_field(field);
-
-    // Serial.println();
-    // Serial.println("Read Register:");
-    // Serial.print("field: ");
-    // Serial.println(field);
-    // Serial.print("offset: ");
-    // Serial.println(offset);
-    // Serial.print("field_length: ");
-    // Serial.println(field_length);
-    // Serial.print("field_out_pre: ");
-    // Serial.println(field_out);
-
-    // Do masking if this is a true field and not a register
-    if (field_length != 8) {
-
-        // 1 Masking
-        int mask1 = pow(2, field_length) - 1;
-        mask1 = mask1 << offset;
-        
-        // Final masking
-        field_out = (field_out & mask1) >> offset;
-    }
-
-    // Serial.print("field_out_post: ");
-    // Serial.println(field_out);
-    // Serial.println();
-
-    return field_out;
-
-}
-
-int BMM150::read_field(int field) {
-
-    return(comm_protocol.read_register(i2c_address, field));
-}
-
-// int BMM150::read_field(int field, int bytes_to_read) {
-
-//     return(comm_protocol.read_register(i2c_address, field));
-// }
-
 void BMM150::read_mxyz() {
 
     int8_t register_out[8];
-    comm_protocol.read_register(i2c_address, 0x42, 8, register_out);
+    read_field(0x42, 8, register_out);
 
     // Temperature resistor
     int8_t rhall_lsb = register_out[6] >> 2;
@@ -199,11 +85,6 @@ void BMM150::read_mxyz() {
     Serial.println(my_float);
     Serial.println(mz_float);
 
-    // Serial.println("BMM Read");
-    // Serial.print("LSB Register: ");
-    // Serial.println(register_out[0]);
-    // Serial.print("MSB Register: ");
-    // Serial.println(register_out[1]);
 }
 
 void BMM150::read_trim_registers() {

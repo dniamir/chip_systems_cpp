@@ -1,7 +1,7 @@
 # include <protocol.h>
 # include <Arduino.h>
 # include <arduino_i2c.h>
-# include <register_map.h>
+# include <chip.h>
 
 struct bmm150_trim_registers {
       int8_t dig_x1;
@@ -17,16 +17,12 @@ struct bmm150_trim_registers {
       uint16_t dig_xyz1;
     };
 
-class BMM150 {
+class BMM150 : public Chip {
 
   public:
   // Different constructors
-    BMM150(ArduinoI2C input_protocol, int i2c_address_in, int who_am_i_reg_in);
-    BMM150(ArduinoI2C input_protocol, int i2c_address_in, String who_am_i_reg_in);
-    BMM150(ArduinoI2C input_protocol, int i2c_address_in, Field who_am_i_reg_in);
-    BMM150(ArduinoI2C input_protocol, int i2c_address_in);
+    BMM150(int i2c_address_in, ArduinoI2C input_protocol);
     BMM150(ArduinoI2C input_protocol);
-    BMM150();
 
     // Dfault I2C address
     int i2c_address = 0x10;
@@ -34,29 +30,15 @@ class BMM150 {
     // WHO AM I register - register the check upon startup
     Field who_am_i_reg = Field{0x40, 0, 8, false};
 
-    ArduinoI2C comm_protocol;
-
     // Initialize the device
-    bool initialize(void);
+    bool initialize();
 
     // Put the BMM150 in default mode
     // 10Hz, 9 XY repititions, 15 Z repitions
-    void default_mode(void);
+    void default_mode();
 
     // Read all Magnetometer Axes
     void read_mxyz();
-
-    // Write value to field
-    void write_field(int field, int field_val);
-    void write_field(int field, int field_val, int offset, int length);
-    void write_field(String field, int field_val);
- 
-    int read_field(int field);
-    // int read_field(int field, int bytes_to_read, int &field_out);
-    int read_field(int field, int offset, int length);
-    // int read_field(int field, int offset, int length, int bytes_to_read);
-    int read_field(String field);
-    int read_field(String field, int bytes_to_read);
 
     // Register Map
     std::map<String, Field> field_map {
