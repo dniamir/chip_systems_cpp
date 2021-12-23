@@ -43,6 +43,8 @@ public:
     void read_field(String field, int bytes_to_read, uint8_t field_out[]);
     void read_field(String field, int bytes_to_read, int8_t field_out[]);
 
+    // Averaging
+    float average(float array_in[], int size);
 
 };
 

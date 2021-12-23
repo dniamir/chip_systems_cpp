@@ -103,3 +103,14 @@ void Chip::read_field(String field, int bytes_to_read, int8_t field_out[]) {
     Field field_to_write = field_map[field];
     read_field(field_to_write.address, bytes_to_read, field_out);
 }
+
+float Chip::average(float array_in[], int size) {
+
+    float sum = 0;
+
+    for(unsigned int i=0; i < size; i++) {
+        sum += array_in[i];
+    }
+
+    return sum / size;
+}
