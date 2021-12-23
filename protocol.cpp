@@ -22,8 +22,10 @@ int Protocol::read_register(int address, int reg) {
 void Protocol::read_register(int address, int reg, int bytes_to_read, int8_t reg_out[]) {
     Serial.println("Using protocol.h");
 }
+void Protocol::read_register(int address, int reg, int bytes_to_read, uint8_t reg_out[]) {
+    Serial.println("Using protocol.h");
+}
 
 void Protocol::write_register(char reg){
     Serial.println("Using protocol.h");
-    return;
 }

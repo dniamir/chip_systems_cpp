@@ -6,14 +6,14 @@ Chip::Chip(ArduinoI2C protocol_in) {
     // static Protocol comm_protocol = comm_protocol;
     comm_protocol = protocol_in;
 
-};
+}
 
 Chip::Chip(int i2c_address_in, ArduinoI2C protocol_in) {
 
     comm_protocol = protocol_in;
     i2c_address = i2c_address_in;
 
-};
+}
 
 void Chip::write_field(String field, int field_val) {
 
@@ -86,6 +86,20 @@ int Chip::read_field(int field) {
     return(comm_protocol.read_register(i2c_address, field));
 }
 
+void Chip::read_field(int field, int bytes_to_read, uint8_t field_out[]) {
+    comm_protocol.read_register(i2c_address, field, bytes_to_read, field_out);
+}
+
 void Chip::read_field(int field, int bytes_to_read, int8_t field_out[]) {
     comm_protocol.read_register(i2c_address, field, bytes_to_read, field_out);
+}
+
+void Chip::read_field(String field, int bytes_to_read, uint8_t field_out[]) {
+    Field field_to_write = field_map[field];
+    read_field(field_to_write.address, bytes_to_read, field_out);
+}
+
+void Chip::read_field(String field, int bytes_to_read, int8_t field_out[]) {
+    Field field_to_write = field_map[field];
+    read_field(field_to_write.address, bytes_to_read, field_out);
 }

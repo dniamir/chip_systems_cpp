@@ -33,3 +33,14 @@ void ArduinoI2C::read_register(int address, int reg, int bytes_to_read, int8_t r
         reg_out[i] = Wire.read();
     }
 }
+
+void ArduinoI2C::read_register(int address, int reg, int bytes_to_read, uint8_t reg_out[]) {
+    Wire.beginTransmission(address);
+    Wire.write(reg);
+    Wire.endTransmission();
+    Wire.requestFrom(address, bytes_to_read);
+
+    for (int i=0; i<bytes_to_read; ++i) {
+        reg_out[i] = Wire.read();
+    }
+}

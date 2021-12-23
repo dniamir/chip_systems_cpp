@@ -16,6 +16,7 @@ public:
     virtual void write_register(int address, int reg, int data);
     virtual int read_register(int address, int reg);
     virtual void read_register(int address, int reg, int bytes_to_read, int8_t reg_out[]);
+    virtual void read_register(int address, int reg, int bytes_to_read, uint8_t reg_out[]);
     
    /* Other members */
 }; 
