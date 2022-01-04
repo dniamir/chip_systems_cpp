@@ -58,8 +58,12 @@ void BMM150::default_mode() {
 
 void BMM150::read_mxyz() {
 
+    // Read data registers
     int8_t register_out[8];
     read_field(0x42, 8, register_out);
+
+    // Save reading time
+    last_os_reading.reading_time_ms = millis();
 
     // Temperature resistor
     int8_t rhall_lsb = register_out[6] >> 2;

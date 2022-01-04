@@ -29,6 +29,9 @@ struct bmm155_os_reading {
   float mx_ut;
   float my_ut;
   float mz_ut;
+
+  // Time of measurement
+  int reading_time_ms;
 };
 
 class BMM150 : public Chip {

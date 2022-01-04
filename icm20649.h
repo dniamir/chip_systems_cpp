@@ -27,6 +27,9 @@ struct icm20649_fifo_reading {
 
   // Number of FIFO readings
   uint16_t count; 
+
+  // Time of Measurements
+  std::vector<int> reading_time_ms;;
 };
 
 // Last one-shot reading
@@ -49,6 +52,9 @@ struct icm20649_os_reading {
   float gy_dps;
   float gz_dps;
   float temp_degc;
+
+  // Time of measurement
+  int reading_time_ms;
 
 };
 

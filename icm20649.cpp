@@ -3,6 +3,7 @@
 # include <arduino_i2c.h>
 # include <cmath>
 # include <vector>
+# include <elapsedMillis.h>
 
 
 ICM20649::ICM20649(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address_in, input_protocol) {
@@ -150,12 +151,17 @@ void ICM20649::read_fifo() {
     std::vector<float> gz_dps(fifo_count);
     std::vector<float> temp_degc(fifo_count);
 
+    std::vector<int> reading_time_ms(fifo_count);
+
     // Batch read from the FIFO and process the data
     for (int i = 0; i < fifo_count; i++) {
 
         // Initialize data and read from FIFO
         uint8_t register_out[fifo_count];
         read_field("FIFO_R_W", 14, register_out);
+
+        // Save reading time
+        reading_time_ms[i] = millis();
 
         // Save raw data
         ax_lsb[i] = (register_out[0] << 8) | register_out[1];
@@ -182,6 +188,7 @@ void ICM20649::read_fifo() {
 
     // Save readings to FIFO
     last_fifo_reading.count = fifo_count;
+    last_fifo_reading.reading_time_ms = reading_time_ms;
 
     last_fifo_reading.ax_lsb = ax_lsb;
     last_fifo_reading.ay_lsb = ay_lsb;
@@ -208,6 +215,9 @@ void ICM20649::read_axyz_gxyz() {
     // Read all registers
     write_field("USER_BANK", 0);
     read_field("ACCEL_XOUT_H", 14, register_out);
+
+    // Save timestamp of reading
+    last_os_reading.reading_time_ms = millis();
 
     // Save raw readings
     last_os_reading.ax_lsb = (register_out[0] << 8) | register_out[1];
