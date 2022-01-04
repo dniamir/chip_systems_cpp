@@ -17,6 +17,20 @@ struct bmm150_trim_registers {
       uint16_t dig_xyz1;
     };
 
+// Last one-shot reading
+struct bmm155_os_reading {
+
+  // Raw readings from the combination of MSB and LSB regs [LSBs]
+  int16_t mx_lsb;
+  int16_t my_lsb;
+  int16_t mz_lsb;
+  
+  // Processed readings [mgee, dps, and degC]
+  float mx_ut;
+  float my_ut;
+  float mz_ut;
+};
+
 class BMM150 : public Chip {
 
   public:
@@ -26,6 +40,9 @@ class BMM150 : public Chip {
 
     // Dfault I2C address
     int i2c_address = 0x10;
+
+    // Reading storage
+    struct bmm155_os_reading last_os_reading;
 
     // WHO AM I register - register the check upon startup
     Field who_am_i_reg = Field{0x40, 0, 8, false};
@@ -39,6 +56,24 @@ class BMM150 : public Chip {
 
     // Read all Magnetometer Axes
     void read_mxyz();
+
+  private:
+
+    // Value in default WHO AM I register - value to match during startup check
+    int who_am_i_val = 0x32;
+
+    // Function to read all trim registers
+    void read_trim_registers();
+
+    // Trim registers
+    struct bmm150_trim_registers trim_data;
+
+    // Compensate data
+    int16_t compensate_x(int16_t mx, uint16_t rhall);
+    int16_t compensate_y(int16_t my, uint16_t rhall);
+    int16_t compensate_z(int16_t mz, uint16_t rhall);
+
+  public:
 
     // Register Map
     std::map<String, Field> field_map {
@@ -69,21 +104,5 @@ class BMM150 : public Chip {
       {"BMM150_DIG_XY2",      Field{0x70, 0, 8, false}},
       {"BMM150_DIG_XY1",      Field{0x71, 0, 8, false}},
     };
-
-  private:
-
-    // Value in default WHO AM I register - value to match during startup check
-    int who_am_i_val = 0x32;
-
-    // Function to read all trim registers
-    void read_trim_registers();
-
-    // Trim registers
-    struct bmm150_trim_registers trim_data;
-
-    // Compensate data
-    int16_t compensate_x(int16_t mx, uint16_t rhall);
-    int16_t compensate_y(int16_t my, uint16_t rhall);
-    int16_t compensate_z(int16_t mz, uint16_t rhall);
 
 };

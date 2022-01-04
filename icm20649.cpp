@@ -2,6 +2,8 @@
 # include <Arduino.h>
 # include <arduino_i2c.h>
 # include <cmath>
+# include <vector>
+
 
 ICM20649::ICM20649(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address_in, input_protocol) {
     Chip::field_map = field_map;
@@ -51,6 +53,7 @@ void ICM20649::default_mode() {
 }
 
 void ICM20649::setup_gyro() {
+    // Should give about 0.2 dps-rms
 
     write_field("USER_BANK", 2);
 
@@ -70,6 +73,7 @@ void ICM20649::setup_gyro() {
 }
 
 void ICM20649::setup_accel() {
+    // Should give about 2.4 mgee-rms
 
     write_field("USER_BANK", 2);
 
@@ -128,51 +132,72 @@ void ICM20649::read_fifo() {
     // Read the number of entries in the FIFO
     uint16_t fifo_count = read_fifo_count();
     fifo_count = fifo_count / 14;
-
-    // Initialize data to read from FIFO
-    uint8_t register_out[fifo_count];
-    float imu_data[7][fifo_count];
+   
+    // Initialize output vectors
+    std::vector<int16_t> ax_lsb(fifo_count);
+    std::vector<int16_t> ay_lsb(fifo_count);
+    std::vector<int16_t> az_lsb(fifo_count);
+    std::vector<int16_t> gx_lsb(fifo_count);
+    std::vector<int16_t> gy_lsb(fifo_count);
+    std::vector<int16_t> gz_lsb(fifo_count);
+    std::vector<int16_t> temp_lsb(fifo_count);
+    
+    std::vector<float> ax_mgee(fifo_count);
+    std::vector<float> ay_mgee(fifo_count);
+    std::vector<float> az_mgee(fifo_count);
+    std::vector<float> gx_dps(fifo_count);
+    std::vector<float> gy_dps(fifo_count);
+    std::vector<float> gz_dps(fifo_count);
+    std::vector<float> temp_degc(fifo_count);
 
     // Batch read from the FIFO and process the data
     for (int i = 0; i < fifo_count; i++) {
+
+        // Initialize data and read from FIFO
+        uint8_t register_out[fifo_count];
         read_field("FIFO_R_W", 14, register_out);
 
-        imu_data[0][i] = process_accel(register_out[0], register_out[1], 4000);
-        imu_data[1][i] = process_accel(register_out[2], register_out[3], 4000);
-        imu_data[2][i] = process_accel(register_out[4], register_out[5], 4000);
+        // Save raw data
+        ax_lsb[i] = (register_out[0] << 8) | register_out[1];
+        ay_lsb[i] = (register_out[2] << 8) | register_out[3];
+        az_lsb[i] = (register_out[4] << 8) | register_out[5];
 
-        imu_data[3][i] = process_gyro(register_out[6], register_out[7], 50);
-        imu_data[4][i] = process_gyro(register_out[8], register_out[9], 50);
-        imu_data[5][i] = process_gyro(register_out[10], register_out[11], 50);
+        gx_lsb[i] = (register_out[6] << 8) | register_out[7];
+        gy_lsb[i] = (register_out[8] << 8) | register_out[9];
+        gz_lsb[i] = (register_out[10] << 8) | register_out[11];
 
-        imu_data[6][i] = process_temperature(register_out[12], register_out[13]);
+        temp_lsb[i] = (register_out[12] << 8) | register_out[13];
+
+        // Save processed data
+        ax_mgee[i] = process_accel(register_out[0], register_out[1], 4000);
+        ay_mgee[i] = process_accel(register_out[2], register_out[3], 4000);
+        az_mgee[i] = process_accel(register_out[4], register_out[5], 4000);
+
+        gx_dps[i] = process_gyro(register_out[6], register_out[7], 50);
+        gy_dps[i] = process_gyro(register_out[8], register_out[9], 50);
+        gz_dps[i] = process_gyro(register_out[10], register_out[11], 50);
+
+        temp_degc[i] = process_temperature(register_out[12], register_out[13]);
     }
 
-    // Average data from FIFO
-    float ax_average = average(imu_data[0], (int)fifo_count);
-    float ay_average = average(imu_data[1], (int)fifo_count);
-    float az_average = average(imu_data[2], (int)fifo_count);
-    float gx_average = average(imu_data[3], (int)fifo_count);
-    float gy_average = average(imu_data[4], (int)fifo_count);
-    float gz_average = average(imu_data[5], (int)fifo_count);
-    float temperature_average = average(imu_data[6], (int)fifo_count);
-    
-    Serial.println();
-    Serial.print(ax_average); 
-    Serial.print("    ");
-    Serial.print(ay_average);
-    Serial.print("    ");
-    Serial.print(az_average); 
-    Serial.print("    ");
-    Serial.print(gx_average); 
-    Serial.print("    ");
-    Serial.print(gy_average);
-    Serial.print("    ");
-    Serial.print(gz_average); 
-    Serial.print("    ");
-    Serial.print(temperature_average); 
-    Serial.print("    ");
-    Serial.print((int)fifo_count); 
+    // Save readings to FIFO
+    last_fifo_reading.count = fifo_count;
+
+    last_fifo_reading.ax_lsb = ax_lsb;
+    last_fifo_reading.ay_lsb = ay_lsb;
+    last_fifo_reading.az_lsb = az_lsb;
+    last_fifo_reading.gx_lsb = gx_lsb;
+    last_fifo_reading.gy_lsb = gy_lsb;
+    last_fifo_reading.gz_lsb = gz_lsb;
+    last_fifo_reading.temp_lsb = temp_lsb;
+
+    last_fifo_reading.ax_mgee = ax_mgee;
+    last_fifo_reading.ay_mgee = ay_mgee;
+    last_fifo_reading.az_mgee = az_mgee;
+    last_fifo_reading.gx_dps = gx_dps;
+    last_fifo_reading.gy_dps = gy_dps;
+    last_fifo_reading.gz_dps = gz_dps;
+    last_fifo_reading.temp_degc = temp_degc;
 
 }
 
@@ -182,32 +207,29 @@ void ICM20649::read_axyz_gxyz() {
 
     // Read all registers
     write_field("USER_BANK", 0);
-    read_field("ACCEL_XOUT_H", 13, register_out);
+    read_field("ACCEL_XOUT_H", 14, register_out);
 
-    float ax_mgee = process_accel(register_out[0], register_out[1], 4000);
-    float ay_mgee = process_accel(register_out[2], register_out[3], 4000);
-    float az_mgee = process_accel(register_out[4], register_out[5], 4000);
+    // Save raw readings
+    last_os_reading.ax_lsb = (register_out[0] << 8) | register_out[1];
+    last_os_reading.ay_lsb = (register_out[2] << 8) | register_out[3];
+    last_os_reading.az_lsb = (register_out[4] << 8) | register_out[5];
 
-    float gx_dps = process_gyro(register_out[6], register_out[7], 50);
-    float gy_dps = process_gyro(register_out[8], register_out[9], 50);
-    float gz_dps = process_gyro(register_out[10], register_out[11], 50);
+    last_os_reading.gx_lsb = (register_out[6] << 8) | register_out[7];
+    last_os_reading.gy_lsb = (register_out[8] << 8) | register_out[9];
+    last_os_reading.gz_lsb = (register_out[10] << 8) | register_out[11];
 
-    float temperature_degc = process_temperature(register_out[12], register_out[13]);
+    last_os_reading.temp_lsb = (register_out[12] << 8) | register_out[13];
 
-    Serial.println();
-    Serial.print(ax_mgee); 
-    Serial.print("    ");
-    Serial.print(ay_mgee);
-    Serial.print("    ");
-    Serial.print(az_mgee); 
-    Serial.print("    ");
-    Serial.print(gx_dps); 
-    Serial.print("    ");
-    Serial.print(gy_dps);
-    Serial.print("    ");
-    Serial.print(gz_dps); 
-    Serial.print("    ");
-    Serial.print(temperature_degc); 
+    // Save processed readings
+    last_os_reading.ax_mgee = process_accel(register_out[0], register_out[1], 4000);
+    last_os_reading.ay_mgee = process_accel(register_out[2], register_out[3], 4000);
+    last_os_reading.az_mgee = process_accel(register_out[4], register_out[5], 4000);
+
+    last_os_reading.gx_dps = process_gyro(register_out[6], register_out[7], 50);
+    last_os_reading.gy_dps = process_gyro(register_out[8], register_out[9], 50);
+    last_os_reading.gz_dps = process_gyro(register_out[10], register_out[11], 50);
+
+    last_os_reading.temp_degc = process_temperature(register_out[12], register_out[13]);
 
 }
 

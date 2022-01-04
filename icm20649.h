@@ -2,20 +2,55 @@
 # include <Arduino.h>
 # include <arduino_i2c.h>
 # include <chip.h>
+# include <vector>
 
-struct icm20649_trim_registers {
-      int8_t dig_x1;
-      int8_t dig_y1;
-      int8_t dig_x2;
-      int8_t dig_y2;
-      uint16_t dig_z1;
-      int16_t dig_z2;
-      int16_t dig_z3;
-      int16_t dig_z4;
-      uint8_t dig_xy1;
-      int8_t dig_xy2;
-      uint16_t dig_xyz1;
-    };
+// Last FIFO reading
+struct icm20649_fifo_reading {
+
+  // Raw readings from the combination of MSB and LSB regs [LSBs]
+  std::vector<int16_t> ax_lsb;
+  std::vector<int16_t> ay_lsb;
+  std::vector<int16_t> az_lsb;
+  std::vector<int16_t> gx_lsb;
+  std::vector<int16_t> gy_lsb;
+  std::vector<int16_t> gz_lsb;
+  std::vector<int16_t> temp_lsb;
+  
+  // Processed readings [mgee, dps, and degC]
+  std::vector<float> ax_mgee;
+  std::vector<float> ay_mgee;
+  std::vector<float> az_mgee;
+  std::vector<float> gx_dps;
+  std::vector<float> gy_dps;
+  std::vector<float> gz_dps;
+  std::vector<float> temp_degc;
+
+  // Number of FIFO readings
+  uint16_t count; 
+};
+
+// Last one-shot reading
+struct icm20649_os_reading {
+
+  // Raw readings from the combination of MSB and LSB regs [LSBs]
+  int16_t ax_lsb;
+  int16_t ay_lsb;
+  int16_t az_lsb;
+  int16_t gx_lsb;
+  int16_t gy_lsb;
+  int16_t gz_lsb;
+  int16_t temp_lsb;
+  
+  // Processed readings [mgee, dps, and degC]
+  float ax_mgee;
+  float ay_mgee;
+  float az_mgee;
+  float gx_dps;
+  float gy_dps;
+  float gz_dps;
+  float temp_degc;
+
+};
 
 class ICM20649 : public Chip {
 
@@ -29,6 +64,10 @@ class ICM20649 : public Chip {
 
     // WHO AM I register - register the check upon startup
     Field who_am_i_reg = Field{0x40, 0, 8, false};
+
+    // Reading storage
+    struct icm20649_fifo_reading last_fifo_reading;
+    struct icm20649_os_reading last_os_reading;
 
     // Initialize the device
     bool initialize();
@@ -44,6 +83,7 @@ class ICM20649 : public Chip {
     // Fifo functions
     void setup_fifo_6axis();
     uint16_t read_fifo_count();
+    // float read_fifo();
     void read_fifo();
 
     // Read all Accel and Gyro Axes
@@ -61,7 +101,6 @@ class ICM20649 : public Chip {
 
   protected:
 
-  // Register map
   public:
 
   // Register Map

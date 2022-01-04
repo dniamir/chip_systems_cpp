@@ -6,6 +6,7 @@ BMM150::BMM150(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address
     Chip::field_map = field_map;
     Chip::who_am_i_reg = who_am_i_reg;
 };
+
 BMM150::BMM150(ArduinoI2C input_protocol) : Chip(input_protocol){
     Chip::field_map = field_map;
     Chip::who_am_i_reg = who_am_i_reg;
@@ -35,7 +36,7 @@ bool BMM150::initialize(void) {
     return bmm_ok;
 }
 
-void BMM150::default_mode(void) {
+void BMM150::default_mode() {
 
     // Exit sleep mode
     write_field("Opmode", 0b00);
@@ -63,27 +64,29 @@ void BMM150::read_mxyz() {
     // Temperature resistor
     int8_t rhall_lsb = register_out[6] >> 2;
     uint16_t rhall_msb = register_out[7] << 6;
-    uint16_t rhall = rhall_msb + rhall_lsb;
+    uint16_t rhall = rhall_msb | rhall_lsb;
 
     int8_t mx_lsb = register_out[0] >> 3;
     int16_t mx_msb = register_out[1] << 5;
-    int16_t mx = mx_msb + mx_lsb;
+    int16_t mx = mx_msb | mx_lsb;
 
     int8_t my_lsb = register_out[2] >> 3;
     int16_t my_msb = register_out[3] << 5;
-    int16_t my = my_msb + my_lsb;
+    int16_t my = my_msb | my_lsb;
 
     int8_t mz_lsb = register_out[4] >> 1;
     int16_t mz_msb = register_out[5] << 7;
-    int16_t mz = mz_msb + mz_lsb;
+    int16_t mz = mz_msb | mz_lsb;
 
-    float mx_float = compensate_x(mx, rhall) * 0.3173828125;    // uT / LSB
-    float my_float = compensate_x(my, rhall) * 0.3173828125;    // uT / LSB
-    float mz_float = compensate_x(mz, rhall) * 0.30517578125;   // uT / LSB
+    // Save processed data
+    last_os_reading.mx_ut = compensate_x(mx, rhall) * 0.3173828125;    // uT / LSB
+    last_os_reading.my_ut = compensate_x(my, rhall) * 0.3173828125;    // uT / LSB
+    last_os_reading.mz_ut = compensate_x(mz, rhall) * 0.30517578125;   // uT / LSB
 
-    Serial.println(mx_float);
-    Serial.println(my_float);
-    Serial.println(mz_float);
+    // Save raw data
+    last_os_reading.mx_lsb = mx;
+    last_os_reading.my_lsb = my;
+    last_os_reading.mz_lsb = mz;
 
 }
 
