@@ -1,5 +1,6 @@
 # include <chip.h>
 # include <arduino_i2c.h>
+# include <vector>
 
 Chip::Chip(ArduinoI2C protocol_in) {
 
@@ -23,16 +24,6 @@ void Chip::write_field(String field, int field_val) {
 }
 
 void Chip::write_field(int field, int field_val, int offset, int field_length) {
-
-    // Serial.println();
-    // Serial.print("Field: ");
-    // Serial.println(field);
-    // Serial.print("field_val: ");
-    // Serial.println(field_val);
-    // Serial.print("offset: ");
-    // Serial.println(offset);
-    // Serial.print("field_length: ");
-    // Serial.println(field_length);
 
     if (field_length != 8) {
         int curr_field_val = read_field(field);
@@ -114,3 +105,14 @@ float Chip::average(float array_in[], int size) {
 
     return sum / size;
 }
+
+// float Chip::average(std::vector<float> array_in, int size) {
+
+//     float sum = 0;
+
+//     for(unsigned int i=0; i < size; i++) {
+//         sum += array_in[i];
+//     }
+
+//     return sum / size;
+// }

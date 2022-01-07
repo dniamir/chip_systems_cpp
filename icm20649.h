@@ -26,7 +26,7 @@ struct icm20649_fifo_reading {
   std::vector<float> temp_degc;
 
   // Number of FIFO readings
-  uint16_t count; 
+  uint16_t fifo_count; 
 
   // Time of Measurements
   std::vector<int> reading_time_ms;;

@@ -19,6 +19,10 @@ ICM20649::ICM20649(ArduinoI2C input_protocol) : Chip(input_protocol){
 
 bool ICM20649::initialize() {
 
+    // Reset device
+    write_field("DEVICE_RESET", 1);
+    delay(200); // WHO AM I will not read if there's no delay
+
     // Check device_id
     uint8_t icm_check = read_field("WHO_AM_I");
 
@@ -104,15 +108,19 @@ void ICM20649::setup_fifo_6axis() {
     write_field("USER_BANK", 0);
 
     // Turn on all 6-axes
-    write_field("ACCEL_FIFO_EN", 1);
-    write_field("GYRO_Z_FIFO_EN", 1);
-    write_field("GYRO_Y_FIFO_EN", 1);
-    write_field("GYRO_X_FIFO_EN", 1);
-    write_field("TEMP_FIFO_EN", 1);
+    write_field("ACCEL_FIFO_EN", 1);  // Enable AXYZ for FIFO
+    write_field("GYRO_Z_FIFO_EN", 1);  // Enable GZ for FIFO
+    write_field("GYRO_Y_FIFO_EN", 1);  // Enable GY for FIFO
+    write_field("GYRO_X_FIFO_EN", 1);  // Enable GX for FIFO
+    write_field("TEMP_FIFO_EN", 1);  // Enable temperature for FIFO
 
-    write_field("FIFO_MODE", 0);  // Will continue writing to FIFO when full
-
+    write_field("FIFO_MODE", 1);  // Will continue writing to FIFO when full
     write_field("FIFO_EN", 1);  // Enable FIFO
+
+    // Reset FIFO
+    write_field("FIFO_RESET", 1);  
+    delay(200);
+    write_field("FIFO_RESET", 0); 
 
 }
 
@@ -132,7 +140,7 @@ void ICM20649::read_fifo() {
 
     // Read the number of entries in the FIFO
     uint16_t fifo_count = read_fifo_count();
-    fifo_count = fifo_count / 14;
+    fifo_count = int(fifo_count / 14);
    
     // Initialize output vectors
     std::vector<int16_t> ax_lsb(fifo_count);
@@ -186,8 +194,8 @@ void ICM20649::read_fifo() {
         temp_degc[i] = process_temperature(register_out[12], register_out[13]);
     }
 
-    // Save readings to FIFO
-    last_fifo_reading.count = fifo_count;
+    // Save readings from FIFO to class
+    last_fifo_reading.fifo_count = fifo_count;
     last_fifo_reading.reading_time_ms = reading_time_ms;
 
     last_fifo_reading.ax_lsb = ax_lsb;
