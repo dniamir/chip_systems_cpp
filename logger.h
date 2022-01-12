@@ -22,9 +22,14 @@ class LOGGER {
     void write_to_log(std::vector<int> timestamps, char* log_type, std::vector<float> log_values);
     void write_to_log(std::vector<int> timestamps, char* log_type, std::vector<int16_t> log_values);
 
-  private:
+    void close_log();
+    void open_log();
+    void flush_log();
 
     File log_file;
-    const char * filename = "DarienTest13.txt";
+
+  private:
+
+    const char * filename = "DarienTest7.txt";
 
 };

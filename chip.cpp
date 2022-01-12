@@ -16,7 +16,7 @@ Chip::Chip(int i2c_address_in, ArduinoI2C protocol_in) {
 
 }
 
-void Chip::write_field(String field, int field_val) {
+void Chip::write_field(String field, int field_val) {   
 
     // Check register map for register
     Field field_to_write = field_map[field];

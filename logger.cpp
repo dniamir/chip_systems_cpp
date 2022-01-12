@@ -29,17 +29,28 @@ void LOGGER::create_log() {
 
 }
 
+void LOGGER::close_log() {
+    log_file.close();
+}
+
+void LOGGER::open_log() {
+     log_file = SD.open(filename, FILE_WRITE);
+}
+
+void LOGGER::flush_log() {
+     log_file.flush();
+}
+
 void LOGGER::write_to_log(int timestamp, char* log_type, char* log_value) {
 
     bool close_log = false;
-    if (!log_file) { log_file = SD.open(filename, FILE_WRITE); close_log = true;}
 
     char log_value_char [40];
     sprintf (log_value_char, "%i,%s,%s", timestamp, log_type, log_value);
 
     log_file.println(log_value_char);
 
-    if (close_log) { log_file.close(); }
+    // log_file.flush();
 
 }
 
@@ -69,24 +80,14 @@ void LOGGER::write_to_log(char* log_type, float log_value) {
 
 void LOGGER::write_to_log(std::vector<int> timestamps, char* log_type, std::vector<float> log_values) {
 
-    bool close_log = false;
-    if (!log_file) { log_file = SD.open(filename, FILE_WRITE); close_log = true;}
-
     for (std::size_t i = 0; i != log_values.size(); ++i) {
         write_to_log(timestamps[i], log_type, log_values[i]);
     }      
-
-    if (close_log) { log_file.close(); }
 }
 
 void LOGGER::write_to_log(std::vector<int> timestamps, char* log_type, std::vector<int16_t> log_values) {
 
-    bool close_log = false;
-    if (!log_file) { log_file = SD.open(filename, FILE_WRITE); close_log = true;}
-
     for (std::size_t i = 0; i != log_values.size(); ++i) {
         write_to_log(timestamps[i], log_type, (int)log_values[i]);
     }      
-
-    if (close_log) { log_file.close(); }
 }   
