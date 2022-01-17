@@ -56,6 +56,26 @@ void BMM150::default_mode() {
     write_field("Channel Z", 0);
 }
 
+void BMM150::high_accuracy_mode() {
+
+    // Exit sleep mode
+    write_field("Opmode", 0b00);
+
+    // Set data rate to 15Hz
+    write_field("Data Rate", 0b100);
+
+    // Set X/Y repititions
+    write_field("REPXY", 47);
+
+    // Set Z repititions
+    write_field("REPZ", 83);
+
+    // Turn on all 3 axes (Enable is 0, not 1)
+    write_field("Channel X", 0);
+    write_field("Channel Y", 0);
+    write_field("Channel Z", 0);
+}
+
 void BMM150::read_mxyz() {
 
     // Read data registers

@@ -57,6 +57,9 @@ class BMM150 : public Chip {
     // 10Hz, 9 XY repititions, 15 Z repitions
     void default_mode();
 
+    // Put the BMM150 in high accuracy mode
+    void high_accuracy_mode();
+
     // Read all Magnetometer Axes
     void read_mxyz();
 
