@@ -118,7 +118,7 @@ void ICM20649::setup_fifo_6axis() {
     write_field("FIFO_EN", 1);  // Enable FIFO
 
     // Reset FIFO
-    write_field("FIFO_RESET", 1);  
+    write_field("FIFO_RESET", 31);  // 5 bits need to be asserted
     delay(200);
     write_field("FIFO_RESET", 0); 
 
