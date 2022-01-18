@@ -5,31 +5,32 @@ class LOGGER {
 
   public:
    // Constructors
-    LOGGER(const char *filename);
+    LOGGER(const char *log_filename_input);
     LOGGER();
 
     void create_log();
+    void create_log(const char *log_filename_input);
 
     // Overloading log write functions
-    void write_to_log(int timestamp, char* log_type, char* log_value);
-    void write_to_log(int timestamp, char* log_type, int log_value);
-    void write_to_log(int timestamp, char* log_type, float log_value);
+    void write_to_log(int timestamp, const char log_type[4], const char* log_value);
+    void write_to_log(int timestamp, const char log_type[4], int log_value);
+    void write_to_log(int timestamp, const char log_type[4], float log_value);
 
-    void write_to_log(char* log_type, char* log_value);
-    void write_to_log(char* log_type, int log_value);
-    void write_to_log(char* log_type, float log_value);
+    void write_to_log(const char log_type[4], const char* log_value);
+    void write_to_log(const char log_type[4], int log_value);
+    void write_to_log(const char log_type[4], float log_value);
 
-    void write_to_log(std::vector<int> timestamps, char* log_type, std::vector<float> log_values);
-    void write_to_log(std::vector<int> timestamps, char* log_type, std::vector<int16_t> log_values);
+    void write_to_log(std::vector<int> timestamps, const char log_type[4], std::vector<float> log_values);
+    void write_to_log(std::vector<int> timestamps, const char log_type[4], std::vector<int16_t> log_values);
 
     void close_log();
     void open_log();
     void flush_log();
 
-    File log_file;
+    const char * log_filename;
 
   private:
 
-    const char * filename = "DarienTest7.txt";
+    File log_file;
 
 };
