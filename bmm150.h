@@ -24,6 +24,7 @@ struct bmm155_os_reading {
   int16_t mx_lsb;
   int16_t my_lsb;
   int16_t mz_lsb;
+  uint16_t rhall;
   
   // Processed readings [mgee, dps, and degC]
   float mx_ut;
@@ -74,7 +75,7 @@ class BMM150 : public Chip {
     // Trim registers
     struct bmm150_trim_registers trim_data;
 
-    // Compensate data
+    // Compensate data - Converts LSB to uT
     int16_t compensate_x(int16_t mx, uint16_t rhall);
     int16_t compensate_y(int16_t my, uint16_t rhall);
     int16_t compensate_z(int16_t mz, uint16_t rhall);
@@ -93,6 +94,7 @@ class BMM150 : public Chip {
       {"Channel Y",           Field{0x4E, 4, 1, false}},
       {"Channel Z",           Field{0x4E, 5, 1, false}},
       {"REPXY",               Field{0x51, 0, 8, false}},
+      
       {"BMM150_DIG_X1",       Field{0x5D, 0, 8, false}},
       {"BMM150_DIG_Y1",       Field{0x5E, 0, 8, false}},
       {"BMM150_DIG_Z4_LSB",   Field{0x62, 0, 8, false}},
