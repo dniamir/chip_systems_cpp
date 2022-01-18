@@ -33,6 +33,9 @@ bool BMM150::initialize(void) {
         bmm_ok = false;
     }
 
+    // Read Trim registers
+    read_trim_registers();
+
     return bmm_ok;
 }
 
@@ -79,38 +82,28 @@ void BMM150::high_accuracy_mode() {
 void BMM150::read_mxyz() {
 
     // Read data registers
-    int8_t register_out[8];
+    uint8_t register_out[8];
     read_field(0x42, 8, register_out);
 
     // Save reading time
     last_os_reading.reading_time_ms = millis();
 
     // Temperature resistor
-    int8_t rhall_lsb = register_out[6] >> 2;
-    uint16_t rhall_msb = register_out[7] << 6;
-    uint16_t rhall = rhall_msb | rhall_lsb;
-
-    int8_t mx_lsb = register_out[0] >> 3;
-    int16_t mx_msb = register_out[1] << 5;
-    int16_t mx = mx_msb | mx_lsb;
-
-    int8_t my_lsb = register_out[2] >> 3;
-    int16_t my_msb = register_out[3] << 5;
-    int16_t my = my_msb | my_lsb;
-
-    int8_t mz_lsb = register_out[4] >> 1;
-    int16_t mz_msb = register_out[5] << 7;
-    int16_t mz = mz_msb | mz_lsb;
+    int16_t mx_lsb = (int16_t)((int16_t)(int8_t)register_out[1] << 5) | (register_out[0] >> 3);
+    int16_t my_lsb = (int16_t)((int16_t)(int8_t)register_out[3] << 5) | (register_out[2] >> 3);
+    int16_t mz_lsb = (int16_t)((int16_t)(int8_t)register_out[5] << 7) | (register_out[4] >> 1);
+    uint16_t rhall = (register_out[7] << 6) | (register_out[6] >> 2);
 
     // Save processed data
-    last_os_reading.mx_ut = compensate_x(mx, rhall) * 0.3173828125;    // uT / LSB
-    last_os_reading.my_ut = compensate_x(my, rhall) * 0.3173828125;    // uT / LSB
-    last_os_reading.mz_ut = compensate_x(mz, rhall) * 0.30517578125;   // uT / LSB
+    last_os_reading.mx_ut = compensate_x(mx_lsb, rhall);
+    last_os_reading.my_ut = compensate_y(my_lsb, rhall);
+    last_os_reading.mz_ut = compensate_z(mz_lsb, rhall);
 
     // Save raw data
-    last_os_reading.mx_lsb = mx;
-    last_os_reading.my_lsb = my;
-    last_os_reading.mz_lsb = mz;
+    last_os_reading.mx_lsb = mx_lsb;
+    last_os_reading.my_lsb = my_lsb;
+    last_os_reading.mz_lsb = mz_lsb;
+    last_os_reading.rhall = rhall;
 
 }
 
@@ -177,7 +170,15 @@ int16_t BMM150::compensate_x(int16_t mx, uint16_t rhall) {
     int32_t process_comp_x9;
     int32_t process_comp_x10;
 
-    process_comp_x0 = rhall;
+    if (rhall != 0) {
+        /* Availability of valid data*/
+        process_comp_x0 = rhall;
+    } else if (trim_data.dig_xyz1 != 0) {
+        process_comp_x0 = trim_data.dig_xyz1;
+    } else {
+        process_comp_x0 = 0;
+    }
+
     process_comp_x1 = ((int32_t)trim_data.dig_xyz1) * 16384;
     process_comp_x2 = ((uint16_t)(process_comp_x1 / process_comp_x0)) - ((uint16_t)0x4000);
     retval = ((int16_t)process_comp_x2);
@@ -209,7 +210,15 @@ int16_t BMM150::compensate_y(int16_t my, uint16_t rhall) {
     int32_t process_comp_y8;
     int32_t process_comp_y9;
 
-    process_comp_y0 = rhall;
+    if (rhall != 0) {
+        /* Availability of valid data*/
+        process_comp_y0 = rhall;
+    } else if (trim_data.dig_xyz1 != 0) {
+        process_comp_y0 = trim_data.dig_xyz1;
+    } else {
+        process_comp_y0 = 0;
+    }
+
     process_comp_y1 = (((int32_t)trim_data.dig_xyz1) * 16384) / process_comp_y0;
     process_comp_y2 = ((uint16_t)process_comp_y1) - ((uint16_t)0x4000);
     retval = ((int16_t)process_comp_y2);
@@ -242,7 +251,9 @@ int16_t BMM150::compensate_z(int16_t mz, uint16_t rhall) {
     process_comp_z4 = (int16_t)((process_comp_z3 + (32768)) / 65536);
     retval = ((process_comp_z2 - process_comp_z1) / (trim_data.dig_z2 + process_comp_z4));
 
-    return retval;
+    retval = retval / 16;
+
+    return (int16_t)retval;
 }
 
 	
