@@ -6,9 +6,9 @@
 
 struct Field{
   unsigned int address;
-  unsigned char offset = 0;
-  unsigned char length = 8; 
-  bool twos_comp = false;
+  unsigned int offset;
+  unsigned int length; 
+  bool twos_comp;
 };
 
 class Chip {   
