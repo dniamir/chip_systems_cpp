@@ -12,6 +12,8 @@ Adafruit_GPS GPS(&GPSSerial);
 #define GPSECHO false
 
 CDPA1616S::CDPA1616S() {
+
+    gps = GPS;
 }
 
 bool CDPA1616S::initialize(void) {
