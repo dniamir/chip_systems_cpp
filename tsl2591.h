@@ -19,6 +19,9 @@ class TSL2591 : public Chip {
     // Configure sensor
     void configure_sensor();
 
+    // Clear Interrupt
+    void clear_interrupt();
+
     // Special Read/Write protocols for this chip
     uint8_t read_tsl_field(String field);
     void read_tsl_field(String field, int bytes_to_read, uint8_t field_out[]);
@@ -74,6 +77,23 @@ class TSL2591 : public Chip {
     {"C0DATAH", Field{0x15, 0, 8, false}},
     {"C1DATAL", Field{0x16, 0, 8, false}},
     {"C1DATAH", Field{0x17, 0, 8, false}},
+
+    // Interrupts and Persists
+    {"PERSIST", Field{0x0C, 0, 4, false}},
+    {"AILTL", Field{0x04, 0, 8, false}},
+    {"AILTH", Field{0x05, 0, 8, false}},
+    {"AIHTL", Field{0x06, 0, 8, false}},
+    {"AIHTH", Field{0x07, 0, 8, false}},
+    {"NPAILTL", Field{0x08, 0, 8, false}},
+    {"NPAILTH", Field{0x09, 0, 8, false}},
+    {"NPAIHTL", Field{0x0A, 0, 8, false}},
+    {"NPAIHTH", Field{0x0B, 0, 8, false}},
+
+    // Status Register
+    {"STATUS", Field{0x13, 0, 8, false}},
+    {"NPINTR", Field{0x13, 5, 1, false}},
+    {"AINT", Field{0x13, 4, 1, false}},
+    {"AVALID", Field{0x13, 0, 1, false}},
 
     // ID Register
     {"ID", Field{0x12, 0, 8, false}},

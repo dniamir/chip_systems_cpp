@@ -20,10 +20,6 @@ void TSL2591::reset() {
 void TSL2591::enable() {
     write_tsl_field("PON", 1);
     write_tsl_field("AEN", 1);
-    Serial.println();
-    Serial.println("Enable/Disable");
-    Serial.println(read_tsl_field("PON"));
-    Serial.println(read_tsl_field("AEN"));
     enabled = true;
 }
 
@@ -56,12 +52,13 @@ bool TSL2591::initialize() {
     return sensor_ok;
 }
 
+void TSL2591::clear_interrupt() {
+    uint8_t dummy = read_field(0b11100111);
+}
+
 void TSL2591::configure_sensor() {
-    write_tsl_field("AGAIN", 0b10);
-    write_tsl_field("ATIME", 0b100);
-    Serial.println("Gain/Integration");
-    Serial.println(read_tsl_field("AGAIN"));
-    Serial.println(read_tsl_field("ATIME"));
+    write_tsl_field("AGAIN", 0b01);
+    write_tsl_field("ATIME", 0b010);
 }
 
 void TSL2591::read_full_luminosity() {
@@ -71,7 +68,7 @@ void TSL2591::read_full_luminosity() {
     if (!enabled) {
         enable();
         disable_after = true;
-        delay(600);  // Maxim integration time
+        delay(600);  // Maximum integration time
     }
 
     // CHAN0 must be read before CHAN1
@@ -79,24 +76,10 @@ void TSL2591::read_full_luminosity() {
     uint8_t register_out[4];
     read_tsl_field("C0DATAL", 4, register_out);
 
-    uint16_t y = (register_out[1] << 8) | register_out[0];
-    uint32_t x = (register_out[3] << 8) | register_out[2];
-
-    Serial.println(register_out[0]);
-    Serial.println(register_out[1]);
-    Serial.println(register_out[2]);
-    Serial.println(register_out[3]);
-
-    x <<= 16;
-    x |= y;
-
-    light_fs = x & 0xFFFF;  // Full spectrum
-    light_ir = x >> 16;  // IR    
-    light_vis = light_fs - light_ir;  // Visible
-
-    Serial.println("Visual Light");
-    Serial.println(light_vis);
-
+    light_fs = (register_out[1] << 8) | register_out[0];
+    light_ir = (register_out[3] << 8) | register_out[2];
+    light_vis = light_fs - light_ir;
+    
     // Disable if originally disabled
     if (disable_after) {disable();};
 
