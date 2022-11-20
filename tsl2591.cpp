@@ -14,25 +14,25 @@ TSL2591::TSL2591(ArduinoI2C input_protocol) : Chip(input_protocol){
 };
 
 void TSL2591::reset() {
-    write_tsl_field("SRESET", 1);
+    TSL2591::write_tsl_field("SRESET", 1);
 }
 
 void TSL2591::enable() {
-    write_tsl_field("PON", 1);
-    write_tsl_field("AEN", 1);
-    enabled = true;
+    TSL2591::write_tsl_field("PON", 1);
+    TSL2591::write_tsl_field("AEN", 1);
+    TSL2591::enabled = true;
 }
 
 void TSL2591::disable() {
-    write_tsl_field("PON", 0);
-    write_tsl_field("AEN", 0);
-    enabled = false;
+    TSL2591::write_tsl_field("PON", 0);
+    TSL2591::write_tsl_field("AEN", 0);
+    TSL2591::enabled = false;
 }
 
 bool TSL2591::initialize() {
 
     // Reset device
-    reset();
+    TSL2591::reset();
     delay(200); // WHO AM I will not read if there's no delay
 
     // Check device_id
@@ -53,12 +53,12 @@ bool TSL2591::initialize() {
 }
 
 void TSL2591::clear_interrupt() {
-    uint8_t dummy = read_field(0b11100111);
+    uint8_t dummy = TSL2591::read_field(0b11100111);
 }
 
 void TSL2591::configure_sensor() {
-    write_tsl_field("AGAIN", 0b01);
-    write_tsl_field("ATIME", 0b010);
+    TSL2591::write_tsl_field("AGAIN", 0b01);
+    TSL2591::write_tsl_field("ATIME", 0b010);
 }
 
 void TSL2591::read_full_luminosity() {
@@ -74,7 +74,7 @@ void TSL2591::read_full_luminosity() {
     // CHAN0 must be read before CHAN1
     // See: https://forums.adafruit.com/viewtopic.php?f=19&t=124176
     uint8_t register_out[4];
-    read_tsl_field("C0DATAL", 4, register_out);
+    TSL2591::read_tsl_field("C0DATAL", 4, register_out);
 
     light_fs = (register_out[1] << 8) | register_out[0];
     light_ir = (register_out[3] << 8) | register_out[2];
@@ -87,15 +87,15 @@ void TSL2591::read_full_luminosity() {
 
 uint8_t TSL2591::read_tsl_field(String field) {
     Field field_to_write = field_map[field];
-    return read_field(command_bit | field_to_write.address, field_to_write.offset, field_to_write.length);
+    return TSL2591::read_field(command_bit | field_to_write.address, field_to_write.offset, field_to_write.length);
 }
 
 void TSL2591::read_tsl_field(String field, int bytes_to_read, uint8_t field_out[]) {
     Field field_to_write = field_map[field];
-    read_field(command_bit | field_to_write.address, bytes_to_read, field_out);
+    TSL2591::read_field(command_bit | field_to_write.address, bytes_to_read, field_out);
 }
 
 void TSL2591::write_tsl_field(String field, uint8_t val) {
     Field field_to_write = field_map[field];
-    write_field(command_bit | field_to_write.address, val, field_to_write.offset, field_to_write.length);
+    TSL2591::write_field(command_bit | field_to_write.address, val, field_to_write.offset, field_to_write.length);
 }

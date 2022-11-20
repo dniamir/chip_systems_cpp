@@ -20,7 +20,7 @@ void Chip::write_field(String field, int field_val) {
 
     // Check register map for register
     Field field_to_write = field_map[field];
-    write_field(field_to_write.address, field_val, field_to_write.offset, field_to_write.length);
+    Chip::write_field(field_to_write.address, field_val, field_to_write.offset, field_to_write.length);
 }
 
 void Chip::write_field(int field, int field_val, int offset, int field_length) {
@@ -40,7 +40,7 @@ void Chip::write_field(int field, int field_val, int offset, int field_length) {
         field_val = (curr_field_val & mask1) | mask2;
     }
 
-    write_field(field, field_val);
+    Chip::write_field(field, field_val);
 }
 
 void Chip::write_field(int field, int field_val) {
@@ -50,12 +50,12 @@ void Chip::write_field(int field, int field_val) {
 
 int Chip::read_field(String field) {
     Field field_to_write = field_map[field];
-    return(read_field(field_to_write.address, field_to_write.offset, field_to_write.length));
+    return(Chip::read_field(field_to_write.address, field_to_write.offset, field_to_write.length));
 }
 
 int Chip::read_field(int field, int offset, int field_length) {
 
-    int field_out = read_field(field);
+    int field_out = Chip::read_field(field);
 
     // Do masking if this is a true field and not a register
     if (field_length != 8) {
@@ -87,12 +87,12 @@ void Chip::read_field(int field, int bytes_to_read, int8_t field_out[]) {
 
 void Chip::read_field(String field, int bytes_to_read, uint8_t field_out[]) {
     Field field_to_write = field_map[field];
-    read_field(field_to_write.address, bytes_to_read, field_out);
+    Chip::read_field(field_to_write.address, bytes_to_read, field_out);
 }
 
 void Chip::read_field(String field, int bytes_to_read, int8_t field_out[]) {
     Field field_to_write = field_map[field];
-    read_field(field_to_write.address, bytes_to_read, field_out);
+    Chip::read_field(field_to_write.address, bytes_to_read, field_out);
 }
 
 float Chip::average(float array_in[], int size) {
