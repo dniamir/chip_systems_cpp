@@ -9,6 +9,7 @@ class TSL2591 : public Chip {
   // Different constructors
     TSL2591(int i2c_address_in, ArduinoI2C input_protocol);
     TSL2591(ArduinoI2C input_protocol);
+    TSL2591();
 
     // Dfault I2C address
     int i2c_address = 0x29;

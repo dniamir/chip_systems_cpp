@@ -2,6 +2,8 @@
 # include <Arduino.h>
 # include <arduino_i2c.h>
 
+TSL2591::TSL2591() {}
+
 TSL2591::TSL2591(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address_in, input_protocol) {
     Chip::field_map = field_map;
     Chip::who_am_i_reg = who_am_i_reg;

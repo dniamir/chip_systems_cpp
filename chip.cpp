@@ -2,6 +2,8 @@
 # include <arduino_i2c.h>
 # include <vector>
 
+Chip::Chip() {}
+
 Chip::Chip(ArduinoI2C protocol_in) {
 
     // static Protocol comm_protocol = comm_protocol;
