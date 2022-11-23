@@ -33,8 +33,8 @@ void BME680::read_cal_codes() {
     BME680::cal_codes.par_p9 = BME680::read_field("par_p9") | (BME680::read_field(0x9f) << 8);
     BME680::cal_codes.par_p10 = BME680::read_field("par_p10");
 
-    BME680::cal_codes.par_h1 = BME680::read_field("par_h1") | (BME680::read_field(0x91) << 8);
-    BME680::cal_codes.par_h2 = BME680::read_field("par_h2") | (BME680::read_field(0x91) << 8);
+    BME680::cal_codes.par_h1 = (BME680::read_field("par_h1") & 0b00001111) | (BME680::read_field(0xe3) << 4);
+    BME680::cal_codes.par_h2 = (BME680::read_field("par_h2") << 4) | (BME680::read_field(0xe2) >> 4);
     BME680::cal_codes.par_h3 = BME680::read_field("par_h3");
     BME680::cal_codes.par_h4 = BME680::read_field("par_h4");
     BME680::cal_codes.par_h5 = BME680::read_field("par_h5");
@@ -64,12 +64,118 @@ int32_t BME680::read_temperature() {
     int64_t var3;
     int16_t calc_temp;
 
-    // Calibrate temperature measurements
+    // Calibrate temperature measurements - Copied from datasheet
     var1 = ((int32_t)temp_adc >> 3) - ((int32_t)par_t1 << 1);
     var2 = (var1 * (int32_t)par_t2) >> 11;
     var3 = ((((var1 >> 1) * (var1 >> 1)) >> 12) * ((int32_t)par_t3 << 4)) >> 14;
     int32_t t_fine = var2 + var3;
     int32_t temp_comp = ((t_fine * 5) + 128) >> 8;
 
+    // Save intermeidate calibration values
+    BME680::t_fine = t_fine;
+    BME680::temp_comp = temp_comp;
+
     return temp_comp;
+}
+
+int32_t BME680::read_humidity() {
+
+    BME680::write_field("mode", 0b01);
+
+    uint8_t humid_out[2];
+    BME680::read_field("hum_msb", 2, humid_out);
+    uint16_t humid_adc = (humid_out[0] << 8) | (humid_out[1]);
+
+    // Get Calibration Codes
+    uint16_t par_h1 = BME680::cal_codes.par_h1;
+    uint16_t par_h2 = BME680::cal_codes.par_h2;
+    int8_t par_h3 = BME680::cal_codes.par_h3;
+    int8_t par_h4 = BME680::cal_codes.par_h4;
+    int8_t par_h5 = BME680::cal_codes.par_h5;
+    uint8_t par_h6 = BME680::cal_codes.par_h6;
+    int8_t par_h7 = BME680::cal_codes.par_h7;
+
+    // Intermediates
+    int32_t var1;
+    int32_t var2;
+    int32_t var3;
+    int32_t var4;
+    int32_t var5;
+    int32_t var6;
+    int32_t humid_comp;
+
+    int32_t temp_comp = BME680::temp_comp;
+
+    // Calibrate temperature measurements - Copied from datasheet
+    int32_t temp_scaled = (int32_t)temp_comp;
+    var1 = (int32_t)humid_adc - (int32_t)((int32_t)par_h1 << 4) -
+        (((temp_scaled * (int32_t)par_h3) / ((int32_t)100)) >> 1);
+    var2 = ((int32_t)par_h2 * (((temp_scaled *
+        (int32_t)par_h4) / ((int32_t)100)) +
+        (((temp_scaled * ((temp_scaled * (int32_t)par_h5) /
+        ((int32_t)100))) >> 6) / ((int32_t)100)) + ((int32_t)(1 << 14)))) >> 10;
+    var3 = var1 * var2;
+    var4 = (((int32_t)par_h6 << 7) +
+        ((temp_scaled * (int32_t)par_h7) / ((int32_t)100))) >> 4;
+    var5 = ((var3 >> 14) * (var3 >> 14)) >> 10;
+    var6 = (var4 * var5) >> 1;
+    humid_comp = (((var3 + var6) >> 10) * ((int32_t) 1000)) >> 12;
+
+
+    return humid_comp;
+}
+
+int32_t BME680::read_pressure() {
+
+    BME680::write_field("mode", 0b01);
+
+    uint8_t press_out[3];
+    BME680::read_field("press_msb", 3, press_out);
+    uint32_t press_adc = (press_out[0] << 12) | (press_out[1] << 4) | (press_out[2] >> 4);
+
+    // Get Calibration Codes
+    uint16_t par_p1 = BME680::cal_codes.par_p1;
+    int16_t par_p2 = BME680::cal_codes.par_p2;
+    int8_t par_p3 = BME680::cal_codes.par_p3;
+    int16_t par_p4 = BME680::cal_codes.par_p4;
+    int16_t par_p5 = BME680::cal_codes.par_p5;
+    int8_t par_p6 = BME680::cal_codes.par_p6;
+    int8_t par_p7 = BME680::cal_codes.par_p7;
+    int16_t par_p8 = BME680::cal_codes.par_p8;
+    int16_t par_p9 = BME680::cal_codes.par_p9;
+    uint8_t par_p10 = BME680::cal_codes.par_p10;
+
+    // Intermediates
+    int32_t var1;
+    int32_t var2;
+    int32_t var3;
+    int32_t press_comp;
+
+    int32_t t_fine = BME680::t_fine;
+
+    // Calibrate pressure measurements - Copied from datasheet
+    var1 = ((int32_t)t_fine >> 1) - 64000;
+    var2 = ((((var1 >> 2) * (var1 >> 2)) >> 11) * (int32_t)par_p6) >> 2;
+    var2 = var2 + ((var1 * (int32_t)par_p5) << 1);
+    var2 = (var2 >> 2) + ((int32_t)par_p4 << 16);
+    var1 = (((((var1 >> 2) * (var1 >> 2)) >> 13) *
+    ((int32_t)par_p3 << 5)) >> 3) + (((int32_t)par_p2 * var1) >> 1);
+
+    var1 = var1 >> 18;
+    var1 = ((32768 + var1) * (int32_t)par_p1) >> 15;
+    press_comp = 1048576 - press_adc;
+    press_comp = (uint32_t)((press_comp - (var2 >> 12)) * ((uint32_t)3125));
+    if (press_comp >= (1 << 30))
+    press_comp = ((press_comp / (uint32_t)var1) << 1);
+    else
+    press_comp = ((press_comp << 1) / (uint32_t)var1);
+    var1 = ((int32_t)par_p9 * (int32_t)(((press_comp >> 3) *
+    (press_comp >> 3)) >> 13)) >> 12;
+    var2 = ((int32_t)(press_comp >> 2) * (int32_t)par_p8) >> 13;
+    var3 = ((int32_t)(press_comp >> 8) * (int32_t)(press_comp >> 8) *
+    (int32_t)(press_comp >> 8) * (int32_t)par_p10) >> 17;
+    press_comp = (int32_t)(press_comp) +
+    ((var1 + var2 + var3 + ((int32_t)par_p7 << 7)) >> 4);
+
+    return press_comp;
 }

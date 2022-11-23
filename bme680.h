@@ -21,6 +21,8 @@ class BME680 : public Chip {
     
     // Read data
     int32_t read_temperature();
+    int32_t read_pressure();
+    int32_t read_humidity();
 
     void soft_reset();  // Soft reset
 
@@ -28,6 +30,10 @@ class BME680 : public Chip {
 
     // Value in default WHO AM I register - value to match during startup check
     int who_am_i_val = 0x61;
+
+    // Intermediate calibration values
+    int32_t t_fine;
+    int32_t temp_comp;
 
     // Last one-shot reading
     struct BME680_cal_codes {
@@ -152,7 +158,7 @@ class BME680 : public Chip {
     {"par_p9", Field{0x9e, 0, 16, false}},
     {"par_p10", Field{0xa0, 0, 8, false}},
     {"par_h1", Field{0xe2, 0, 16, false}},
-    {"par_h2", Field{0xe2, 0, 16, false}},
+    {"par_h2", Field{0xe1, 0, 16, false}},
     {"par_h3", Field{0xe4, 0, 8, false}},
     {"par_h4", Field{0xe5, 0, 8, false}},
     {"par_h5", Field{0xe6, 0, 8, false}},
