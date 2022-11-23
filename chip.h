@@ -36,9 +36,9 @@ public:
   void write_field(int field, int field_val);
 
   // Overloading read_field
-  int read_field(String field);
-  int read_field(int field);
-  int read_field(int field, int offset, int field_length);
+  uint8_t read_field(String field);
+  uint8_t read_field(int field);
+  uint8_t read_field(int field, int offset, int field_length);
   void read_field(int field, int bytes_to_read, uint8_t field_out[]);
   void read_field(int field, int bytes_to_read, int8_t field_out[]);
   void read_field(String field, int bytes_to_read, uint8_t field_out[]);

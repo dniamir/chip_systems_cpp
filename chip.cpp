@@ -50,12 +50,12 @@ void Chip::write_field(int field, int field_val) {
     comm_protocol.write_register(i2c_address, field, field_val);
 }
 
-int Chip::read_field(String field) {
+uint8_t Chip::read_field(String field) {
     Field field_to_write = field_map[field];
     return(Chip::read_field(field_to_write.address, field_to_write.offset, field_to_write.length));
 }
 
-int Chip::read_field(int field, int offset, int field_length) {
+uint8_t Chip::read_field(int field, int offset, int field_length) {
 
     int field_out = Chip::read_field(field);
 
@@ -74,7 +74,7 @@ int Chip::read_field(int field, int offset, int field_length) {
 
 }
 
-int Chip::read_field(int field) {
+uint8_t Chip::read_field(int field) {
 
     return(comm_protocol.read_register(i2c_address, field));
 }
