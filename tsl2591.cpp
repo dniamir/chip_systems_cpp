@@ -12,7 +12,7 @@ TSL2591::TSL2591(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_addre
 TSL2591::TSL2591(ArduinoI2C input_protocol) : Chip(input_protocol){
     Chip::field_map = field_map;
     Chip::who_am_i_reg = who_am_i_reg;
-    Chip::i2c_address = i2c_address;
+    Chip::i2c_address = TSL2591::i2c_address;
 };
 
 void TSL2591::reset() {
