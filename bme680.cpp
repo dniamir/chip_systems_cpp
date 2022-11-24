@@ -166,9 +166,6 @@ void BME680::set_heater_temp(int16_t target_temp, uint8_t profile_num) {
     if (temp_comp == 0) {BME680::read_temperature();} 
     temp_comp = BME680::temp_comp;
     int32_t amb_temp = temp_comp / 100;
-    
-    Serial.println(target_temp);
-    Serial.println(temp_comp);
 
     // Intermediates
     uint8_t res_heat_range = BME680::read_field("res_heat_range"); 
