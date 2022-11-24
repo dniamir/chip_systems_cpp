@@ -11,8 +11,11 @@ class BME680 : public Chip {
     // Different constructors
     BME680(ArduinoI2C input_protocol);
     BME680(int i2c_address_in, ArduinoI2C input_protocol);
-    void read_cal_codes();
 
+    // Sensor config
+    void set_heater_temp(int16_t target_temp, uint8_t profile_num);
+    void set_gas_wait(int16_t wait_time, uint8_t profile_num);
+    
     // I2C addresses
     int i2c_address = 0b1110110;
 
@@ -23,6 +26,14 @@ class BME680 : public Chip {
     int32_t read_temperature();
     int32_t read_pressure();
     int32_t read_humidity();
+    int32_t read_gas();
+    int16_t calculate_iaq(int32_t gas_reading, int32_t humidity_reading);
+
+    // Calibrations
+    void read_cal_codes();
+    int32_t calibrate_temperature(uint32_t press_adc);
+    int32_t calibrate_pressure(uint32_t press_adc);
+    int32_t calibrate_humidity(uint16_t humid_adc);
 
     void soft_reset();  // Soft reset
 
@@ -77,12 +88,12 @@ class BME680 : public Chip {
       int8_t gas_range;
       int8_t range_switching_error;
 
-      int GAS_LOOKUP1[16] = {2147483647, 2147483647, 2147483647, 2147483647,
+      int64_t const_array1_int[16] = {2147483647, 2147483647, 2147483647, 2147483647,
 	                2147483647, 2126008810, 2147483647, 2130303777, 2147483647,
 	                2147483647, 2143188679, 2136746228, 2147483647, 2126008810,
 	                2147483647, 2147483647};
 	
-      long long GAS_LOOKUP2[16] = {4096000000, 2048000000, 1024000000, 512000000,
+      int64_t const_array2_int[16] = {4096000000, 2048000000, 1024000000, 512000000,
                       255744255, 127110228, 64000000, 32258064,
                       16016016, 8000000, 4000000, 2000000,
                       1000000, 500000, 250000, 125000};
