@@ -17,7 +17,7 @@ class MAX17260 : public Chip {
     Field who_am_i_reg = Field{0x21, 0, 8, false};
 
     void configure_system();
-    void soft_reset();  // Soft reset
+    void soft_reset();  // Soft reset - requires 45s
     bool check_por();
 
     float read_level_percent();
@@ -51,9 +51,12 @@ class MAX17260 : public Chip {
 
     // Conversions
     float sec_per_lsb = 5.625;
-    float per_per_lsb = 1 / 256;
+    float per_per_lsb = 1 / 256.0;
     float mah_per_lsb = 0.5;
     float v_per_lsb =  78.125 * 1e-6;
+    float v_empty_per_lsb = 10.0 * 1e-3;  // V / LSB
+    float v_recovery_per_lsb = 40.0 * 1e-3;  // V / LSB
+    float i_term_per_lsb = 1 / 6.4;  // mA / LSB
 
 
   protected:
@@ -64,8 +67,24 @@ class MAX17260 : public Chip {
   std::map<String, Field> field_map {
     
     {"Status", Field{0x00, 0, 16, false}},
+    {"Br", Field{0x00, 15, 1, false}},
+    {"Smx", Field{0x00, 14, 1, false}},
+    {"Tmx", Field{0x00, 13, 1, false}},
+    {"Vmx", Field{0x00, 12, 1, false}},
+    {"Bi", Field{0x00, 11, 1, false}},
+    {"Smn", Field{0x00, 10, 1, false}},
+    {"Tmn", Field{0x00, 9, 1, false}},
+    {"Vmn", Field{0x00, 8, 1, false}},
+    {"dSOCi", Field{0x00, 7, 1, false}},
+    {"Imx", Field{0x00, 6, 1, false}},
+    {"Bst", Field{0x00, 3, 1, false}},
+    {"Imn", Field{0x00, 2, 1, false}},
     {"POR", Field{0x00, 1, 1, false}},
+
     {"VAlrtTh", Field{0x01, 0, 16, false}},
+
+    {"IChgTerm", Field{0x1E, 0, 16, false}},
+    {"DesignCap", Field{0x18, 0, 16, false}},
 
     {"VEmpty", Field{0x03A, 0, 16, false}},
     {"VE", Field{0x03A, 7, 9, false}},
@@ -78,8 +97,6 @@ class MAX17260 : public Chip {
     {"VChg", Field{0xDB, 10, 1, false}},
     {"ModelID", Field{0xDB, 4, 4, false}},
     {"CSEL", Field{0xDB, 2, 1, false}},
-
-    {"IChgTerm", Field{0x1E, 0, 16, false}},
 
     {"Config", Field{0x1D, 0, 16, false}},
     {"TSel", Field{0x1D, 15, 1, false}},
@@ -119,6 +136,9 @@ class MAX17260 : public Chip {
     {"MaxMinVolt", Field{0xFF, 0, 16, false}},
     {"MaxVCELL", Field{0xFF, 8, 8, false}},
     {"MinVCELL", Field{0xFF, 0, 8, false}},
+
+    {"FStat", Field{0x3D, 0, 16, false}},
+    {"HibCfg", Field{0xBA, 0, 16, false}},
 
   };
 

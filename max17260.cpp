@@ -13,65 +13,78 @@ MAX17260::MAX17260(ArduinoI2C input_protocol) : Chip(input_protocol) {
     Chip::i2c_address = MAX17260::i2c_address;
 };
 
-// void MAX17260::soft_reset() {
-//     MAX17260::read_field16("reset", 0xB6);
-// }
+void MAX17260::soft_reset() {
+    // Requires 45s of wait
+     MAX17260::write_field16("HibCfg", 0);
+     MAX17260::write_field16("SHDN", 1);
+}
 
 bool MAX17260::check_por() {
-    return (bool)MAX17260::read_field(0x00);
+    return (bool)MAX17260::read_field16("POR");
 }
 
 void MAX17260::configure_system() {
 
-    float ChargeVoltage = 3.7;
+    uint16_t DesignCap = 420;  // mAh
+    uint16_t IchgTerm = 420;  // mA
+    uint16_t VEmpty = 3.0;   // Minimum Voltage
+    float VRecovery = 3.7;
+    float ChargeVoltage = 4.2;
 
-    // https://pdfserv.maximintegrated.com/en/an/ug6595-modelgauge-m5-host-side-software-implementation-guide.pdf
+    // Scale factor for VEmpty
+    uint16_t VE = uint16_t(VEmpty / MAX17260::v_empty_per_lsb);  // Empty Voltage - resolution is 10mV / LSB
+    uint16_t VR = uint16_t(VRecovery / MAX17260::v_recovery_per_lsb);  // Recovery Voltage (voltage for clearing empty detection) - resolution is 40mV / LSB
+    VEmpty = (VE << 7) + VR;
+
+    // Scale factor for IchgTerm
+    IchgTerm = uint16_t(IchgTerm / MAX17260::i_term_per_lsb);
 
     // Make sure POR is 1
-    if (!MAX17260::check_por()) {
-        while(MAX17260::read_field(0x3D) & 1) {delay(10);}
+    if (MAX17260::read_field16("POR")) {
+    
+        while(MAX17260::read_field16("FStat") & 1) {delay(10);}
+        
+        
+        uint16_t HibCFG = MAX17260::read_field16("HibCfg");
+        MAX17260::write_field16(0x60, 0x90); // Exit Hibernate Mode step 1
+        MAX17260::write_field16("HibCfg", 0x0); // Exit Hibernate Mode step 2
+        MAX17260::write_field16(0x60, 0x0); // Exit Hibernate Mode step 3
+
+        MAX17260::write_field16("DesignCap", DesignCap); // Write DesignCap
+        MAX17260::write_field16("IChgTerm", IchgTerm); // Write IchgTerm
+        MAX17260::write_field16("VEmpty", VEmpty); // Write VEmpty
+        if (ChargeVoltage > 4.275) {
+            MAX17260::write_field16("ModelCFG", 0x8400); // Write ModelCFG
+        }
+        else {
+            MAX17260::write_field16("ModelCFG", 0x8000); // Write ModelCFG
+        }
+        //Poll ModelCFG.Refresh(highest bit),
+        //proceed to Step 3 when ModelCFG.Refresh=0.
+        while (MAX17260::read_field16("Refresh")) {delay(10);}
+
+        MAX17260::write_field16("HibCfg", HibCFG); // Restore Original HibCFG value
+
+        // Clear POR Bit
+        MAX17260::write_field16("POR", 0);
+
     }
-
-    uint16_t HibCFG = MAX17260::read_field(0xBA);
-    MAX17260::write_field(0x60, 0x90); // Exit Hibernate Mode step 1
-    MAX17260::write_field(0xBA, (uint8_t)0x0); // Exit Hibernate Mode step 2
-    MAX17260::write_field(0x60, (uint8_t)0x0); // Exit Hibernate Mode step 3
-
-    MAX17260::write_field(0x18, DesignCap); // Write DesignCap
-    MAX17260::write_field(0x1E, IchgTerm); // Write IchgTerm
-    MAX17260::write_field(0x3A, VEmpty); // Write VEmpty
-    if (ChargeVoltage > 4.275) {
-        MAX17260::write_field(0xDB, 0x8400); // Write ModelCFG
-    }
-    else {
-        MAX17260::write_field(0xDB, 0x8000); // Write ModelCFG
-    }
-    //Poll ModelCFG.Refresh(highest bit),
-    //proceed to Step 3 when ModelCFG.Refresh=0.
-    while (MAX17260::read_field(0xDB) & 0x8000) {delay(10);}
-
-    MAX17260::write_field(0xBA, HibCFG); // Restore Original HibCFG value
-
-    // Clear POR Bit
-    uint16_t Status = MAX17260::read_field("Status");
-    MAX17260::write_field(0x00, Status & 0xFFFD);
-
 }
 
 float MAX17260::read_batt_voltage() {
-    return MAX17260::read_field("VCell") * MAX17260::v_per_lsb;
+    return MAX17260::read_field16("VCell") * MAX17260::v_per_lsb;
 }
 
 float MAX17260::read_level_percent() {
-    return MAX17260::read_field(0x06) * MAX17260::per_per_lsb;
+    return MAX17260::read_field16("RepSOC") * MAX17260::per_per_lsb;
 }
 
 float MAX17260::read_level_mahrs() {
-    return MAX17260::read_field(0x05) * MAX17260::mah_per_lsb;
+    return MAX17260::read_field16("RepCap") * MAX17260::mah_per_lsb;
 }
 
 float MAX17260::read_tte() {
-    return MAX17260::read_field(0x11) * MAX17260::sec_per_lsb;
+    return MAX17260::read_field16("TTE") * MAX17260::sec_per_lsb;
 }
 
 void MAX17260::read_data(bool print_data) {
@@ -79,6 +92,7 @@ void MAX17260::read_data(bool print_data) {
     float level_percent = MAX17260::read_level_percent();
     float level_mah = MAX17260::read_level_mahrs();
     float time_to_empty = MAX17260::read_tte();
+    float batt_voltage = MAX17260::read_batt_voltage();
 
     if (!print_data) {return;}
 
@@ -88,7 +102,9 @@ void MAX17260::read_data(bool print_data) {
     Serial.print(level_mah);
     Serial.print("mAh, ");
     Serial.print(time_to_empty);
-    Serial.print("s");
+    Serial.print("s, ");
+    Serial.print(batt_voltage);
+    Serial.print("V");
     Serial.println();
 
 }
