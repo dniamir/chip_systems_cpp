@@ -33,7 +33,7 @@ void BME680::read_cal_codes() {
     BME680::cal_codes.par_p9 = BME680::read_field("par_p9") | (BME680::read_field(0x9f) << 8);
     BME680::cal_codes.par_p10 = BME680::read_field("par_p10");
 
-    BME680::cal_codes.par_h1 = (BME680::read_field("par_h1") & 0b00001111) | (BME680::read_field(0xe3) << 4);
+    BME680::cal_codes.par_h1 = (BME680::read_field("par_h1") & 0b1111) | (BME680::read_field(0xe3) << 4);
     BME680::cal_codes.par_h2 = (BME680::read_field("par_h2") << 4) | (BME680::read_field(0xe2) >> 4);
     BME680::cal_codes.par_h3 = BME680::read_field("par_h3");
     BME680::cal_codes.par_h4 = BME680::read_field("par_h4");

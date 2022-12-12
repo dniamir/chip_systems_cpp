@@ -32,23 +32,13 @@ public:
 
   // Overloading write_field
   void write_field(String field, uint8_t field_val);
-  void write_field16(String field, uint16_t field_val);
-
   void write_field(uint8_t field, uint8_t field_val, uint8_t offset, uint8_t field_length);
-  void write_field16(uint8_t field, uint16_t field_val, uint8_t offset, uint8_t field_length);
-
   void write_field(uint8_t field, uint8_t field_val);
-  void write_field16(uint8_t field, uint16_t field_val);
 
   // Overloading read_field
-  uint16_t read_field(String field);
-  uint16_t read_field16(String field);
-
-  uint16_t read_field(int field);
-  uint16_t read_field16(int field);
-
-  uint16_t read_field(int field, int offset, int field_length);
-  uint16_t read_field16(int field, int offset, int field_length);
+  uint8_t read_field(String field);
+  uint8_t read_field(int field);
+  uint8_t read_field(int field, int offset, int field_length);
 
   void read_field(int field, int bytes_to_read, uint8_t field_out[]);
   void read_field(int field, int bytes_to_read, int8_t field_out[]);
