@@ -28,6 +28,16 @@ class MAX17260 : public Chip {
 
     void read_data(bool print_data);
 
+    // Overloading write_field
+    void write_field16(String field, uint16_t field_val);
+    void write_field16(uint8_t field, uint16_t field_val, uint8_t offset, uint8_t field_length);
+    void write_field16(uint8_t field, uint16_t field_val);
+
+    // Overloading read_field
+    uint16_t read_field16(String field);
+    uint16_t read_field16(uint8_t field);
+    uint16_t read_field16(uint8_t field, uint8_t offset, uint8_t field_length);
+
 
   private:
 

@@ -34,8 +34,8 @@ void MAX17260::configure_system() {
 
     uint16_t HibCFG = MAX17260::read_field(0xBA);
     MAX17260::write_field(0x60, 0x90); // Exit Hibernate Mode step 1
-    MAX17260::write_field(0xBA, 0x0); // Exit Hibernate Mode step 2
-    MAX17260::write_field(0x60, 0x0); // Exit Hibernate Mode step 3
+    MAX17260::write_field(0xBA, (uint8_t)0x0); // Exit Hibernate Mode step 2
+    MAX17260::write_field(0x60, (uint8_t)0x0); // Exit Hibernate Mode step 3
 
     MAX17260::write_field(0x18, DesignCap); // Write DesignCap
     MAX17260::write_field(0x1E, IchgTerm); // Write IchgTerm
@@ -91,4 +91,64 @@ void MAX17260::read_data(bool print_data) {
     Serial.print("s");
     Serial.println();
 
+}
+
+uint16_t MAX17260::read_field16(String field) {
+    Field field_to_write = MAX17260::field_map[field];
+    return(MAX17260::read_field16(field_to_write.address, field_to_write.offset, field_to_write.length));
+}
+
+uint16_t MAX17260::read_field16(uint8_t field) {
+    return(MAX17260::read_field16(field, 0, 16));
+}
+
+uint16_t MAX17260::read_field16(uint8_t field, uint8_t offset, uint8_t field_length) {
+
+    uint8_t field_bytes[2];
+    MAX17260::read_field(field, 2, field_bytes);
+    uint16_t field_out = (field_bytes[1] << 8) | field_bytes[0];
+
+    // Masking if field is not 2 byte long
+    if (field_length != 16) {
+
+        // 1 Masking
+        int mask1 = pow(2, field_length) - 1;
+        mask1 = mask1 << offset;
+        
+        // Final masking
+        field_out = (field_out & mask1) >> offset;
+    }
+    return field_out;
+}
+
+void MAX17260::write_field16(String field, uint16_t field_val) {
+    Field field_to_write = MAX17260::field_map[field];
+    MAX17260::write_field16(field_to_write.address, field_val, field_to_write.offset, field_to_write.length);
+}
+
+void MAX17260::write_field16(uint8_t field, uint16_t field_val) {
+    MAX17260::write_field16(field, field_val, 0, 16);
+}
+
+void MAX17260::write_field16(uint8_t field, uint16_t field_val, uint8_t offset, uint8_t field_length) {
+
+    uint16_t curr_field_val = MAX17260::read_field16(field);
+
+    // Zero-ing mask
+    uint16_t mask1 = pow(2, field_length) - 1;
+    mask1 = mask1 << offset;
+
+    mask1 = (uint16_t)(pow(2, 16) - 1) & ~mask1;
+    
+    // Mask adding actual field_val
+    uint16_t mask2 = field_val << offset;
+    
+    // Final masking
+    field_val = (curr_field_val & mask1) | mask2;
+    
+    uint8_t field_write[2];
+	field_write[0] = field_val & 0b11111111;
+    field_write[1] = field_val >> 8;
+
+    MAX17260::write_field(field, field_write);
 }
