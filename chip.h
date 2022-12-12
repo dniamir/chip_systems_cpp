@@ -34,6 +34,7 @@ public:
   void write_field(String field, uint8_t field_val);
   void write_field(uint8_t field, uint8_t field_val, uint8_t offset, uint8_t field_length);
   void write_field(uint8_t field, uint8_t field_val);
+  void write_field(uint8_t field, uint8_t field_vals[]);
 
   // Overloading read_field
   uint8_t read_field(String field);

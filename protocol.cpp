@@ -6,7 +6,7 @@ void Protocol::write_register(int address, int reg, int data) {
     return;
 }
 
-void Protocol::write_register16(int address, int reg, int data) {
+void Protocol::write_register(int address, int reg, uint8_t data[]) {
     return;
 }
    
@@ -19,11 +19,6 @@ void Protocol::write_register16(int address, int reg, int data) {
 // }
 
 int Protocol::read_register(int address, int reg) {
-    Serial.println("Using protocol.h");
-    return 0;
-}
-
-uint16_t Protocol::read_register16(int address, int reg) {
     Serial.println("Using protocol.h");
     return 0;
 }

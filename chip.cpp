@@ -50,6 +50,10 @@ void Chip::write_field(uint8_t field, uint8_t field_val) {
     comm_protocol.write_register(i2c_address, field, field_val);
 }
 
+void Chip::write_field(uint8_t field, uint8_t field_vals[]) {
+    comm_protocol.write_register(i2c_address, field, field_vals);
+}
+
 uint8_t Chip::read_field(String field) {
     Field field_to_write = field_map[field];
     return(Chip::read_field(field_to_write.address, field_to_write.offset, field_to_write.length));

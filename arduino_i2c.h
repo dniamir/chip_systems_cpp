@@ -14,9 +14,8 @@ public:
 
     // Base functions
     void write_register(int address, int reg, int data) override;
-    void write_register16(int address, int reg, int data) override;
+    void write_register(int address, int reg, uint8_t data[]) override;
     int read_register(int address, int reg) override;
-    uint16_t read_register16(int address, int reg) override;
     void read_register(int address, int reg, int bytes_to_read, int8_t reg_out[]) override;
     void read_register(int address, int reg, int bytes_to_read, uint8_t reg_out[]) override;
 
