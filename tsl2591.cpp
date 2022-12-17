@@ -58,6 +58,10 @@ void TSL2591::clear_interrupt() {
     uint8_t dummy = TSL2591::read_field(0b11100111);
 }
 
+void TSL2591::enable_interrupt() {
+    uint8_t dummy = TSL2591::read_field(0b11100100);
+}
+
 void TSL2591::configure_sensor() {
     TSL2591::write_tsl_field("AGAIN", 0b01);
     TSL2591::write_tsl_field("ATIME", 0b010);

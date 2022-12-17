@@ -20,8 +20,9 @@ class TSL2591 : public Chip {
     // Configure sensor
     void configure_sensor();
 
-    // Clear Interrupt
+    // Interrupt
     void clear_interrupt();
+    void enable_interrupt();
 
     // Special Read/Write protocols for this chip
     uint8_t read_tsl_field(String field);
@@ -58,7 +59,7 @@ class TSL2591 : public Chip {
 
   // Register Map
   std::map<String, Field> field_map {
-    
+
     // Enable Register
     {"ENABLE", Field{0x00, 0, 8, false}},
     {"NPIEN", Field{0x00, 7, 1, false}},
