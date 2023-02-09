@@ -205,3 +205,10 @@ void MAX17260::write_field16(uint8_t field, uint16_t field_val, uint8_t offset, 
 
     MAX17260::write_field(field, field_write);
 }
+
+bool MAX17260::read_charge_source_ok(){
+
+    // The pin is actually for the charger, MAX8600, not the fuel gauge
+    bool charger_ok = digitalRead(MAX17260::charger_ok_pin);
+    return charger_ok;
+}
