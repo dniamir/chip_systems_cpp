@@ -25,8 +25,8 @@ bool MAX17260::check_por() {
 
 void MAX17260::configure_system() {
 
-    uint16_t DesignCap = 420;  // mAh
-    uint16_t IchgTerm = 420;  // mA
+    uint16_t DesignCap = 2000;  // mAh
+    uint16_t IchgTerm = 10;  // mA
     uint16_t VEmpty = 3.0;   // Minimum Voltage
     float VRecovery = 3.7;
     float ChargeVoltage = 4.2;
