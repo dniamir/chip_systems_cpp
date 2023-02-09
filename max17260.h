@@ -23,6 +23,9 @@ class MAX17260 : public Chip {
     float read_level_percent();
     float read_level_mahrs();
     float read_tte();
+    float read_ttf();
+    float read_current(bool avg=false);
+    float read_temperature(bool avg=false);
 
     float read_batt_voltage();
 
@@ -38,6 +41,11 @@ class MAX17260 : public Chip {
     uint16_t read_field16(uint8_t field);
     uint16_t read_field16(uint8_t field, uint8_t offset, uint8_t field_length);
 
+    // Save important battery readings
+    float level_percent;
+    float level_mah;
+    float batt_voltage;
+
 
   private:
 
@@ -51,12 +59,14 @@ class MAX17260 : public Chip {
 
     // Conversions
     float sec_per_lsb = 5.625;
-    float per_per_lsb = 1 / 256.0;
+    float per_per_lsb = 1.0 / 256.0;
     float mah_per_lsb = 0.5;
+    float ua_per_lsb = 156.25;
     float v_per_lsb =  78.125 * 1e-6;
     float v_empty_per_lsb = 10.0 * 1e-3;  // V / LSB
     float v_recovery_per_lsb = 40.0 * 1e-3;  // V / LSB
-    float i_term_per_lsb = 1 / 6.4;  // mA / LSB
+    float i_term_per_lsb = 1.0 / 6.4;  // mA / LSB
+    float degc_per_lsb = 1.0 / 256.0;
 
 
   protected:
@@ -80,6 +90,12 @@ class MAX17260 : public Chip {
     {"Bst", Field{0x00, 3, 1, false}},
     {"Imn", Field{0x00, 2, 1, false}},
     {"POR", Field{0x00, 1, 1, false}},
+
+    {"Current", Field{0x0A, 0, 16, false}},
+    {"AvgCurrent", Field{0x0B, 0, 16, false}},
+
+    {"Temperature", Field{0x08, 0, 16, false}},
+    {"AvgTemperature", Field{0x16, 0, 16, false}},
 
     {"VAlrtTh", Field{0x01, 0, 16, false}},
 

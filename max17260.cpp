@@ -90,12 +90,36 @@ float MAX17260::read_tte() {
     return MAX17260::read_field16("TTE") * MAX17260::sec_per_lsb;
 }
 
+float MAX17260::read_ttf() {
+    return MAX17260::read_field16("TTF") * MAX17260::sec_per_lsb;
+}
+
+float MAX17260::read_current(bool avg) {
+    if(avg){return (int16_t)MAX17260::read_field16("AvgCurrent") * MAX17260::ua_per_lsb;}
+    else{return (int16_t)MAX17260::read_field16("Current") * MAX17260::ua_per_lsb;}
+}
+float MAX17260::read_temperature(bool avg) {
+    if(avg){return MAX17260::read_field16("AvgTemperature") * MAX17260::degc_per_lsb;}
+    else{return MAX17260::read_field16("Temperature") * MAX17260::degc_per_lsb;}
+}
+    
+
 void MAX17260::read_data(bool print_data) {
 
     float level_percent = MAX17260::read_level_percent();
     float level_mah = MAX17260::read_level_mahrs();
     float time_to_empty = MAX17260::read_tte();
+    float time_to_full = MAX17260::read_ttf();
     float batt_voltage = MAX17260::read_batt_voltage();
+
+    float current_ma = MAX17260::read_current(false) / 1e3;
+    float avg_current_ma = MAX17260::read_current(true) / 1e3;
+    float temperature = MAX17260::read_temperature(false);
+    float avg_temperature = MAX17260::read_temperature(true);
+
+    MAX17260::level_percent = level_percent;
+    MAX17260::level_mah = level_mah;
+    MAX17260::batt_voltage = batt_voltage;
 
     if (!print_data) {return;}
 
@@ -106,6 +130,16 @@ void MAX17260::read_data(bool print_data) {
     Serial.print("mAh, ");
     Serial.print(time_to_empty);
     Serial.print("s, ");
+    Serial.print(time_to_full);
+    Serial.print("s, ");
+    Serial.print(current_ma);
+    Serial.print("mA, ");
+    Serial.print(avg_current_ma);
+    Serial.print("mA, ");
+    Serial.print(temperature);
+    Serial.print("degC, ");
+    Serial.print(avg_temperature);
+    Serial.print("degC, ");
     Serial.print(batt_voltage);
     Serial.print("V");
     Serial.println();
