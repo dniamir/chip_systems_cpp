@@ -65,6 +65,9 @@ void MAX17260::configure_system() {
 
         MAX17260::write_field16("HibCfg", HibCFG); // Restore Original HibCFG value
 
+        // Set Temperature measurement to thermistor
+        MAX17260::write_field16("TSel", 1);
+
         // Clear POR Bit
         MAX17260::write_field16("POR", 0);
 
