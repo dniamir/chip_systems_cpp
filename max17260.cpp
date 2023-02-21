@@ -68,6 +68,9 @@ void MAX17260::configure_system() {
         // Set Temperature measurement to thermistor
         MAX17260::write_field16("TSel", 1);
 
+        // Set Automatic shutdown to True
+        MAX17260::write_field16("COMMSH", 1);
+
         // Clear POR Bit
         MAX17260::write_field16("POR", 0);
 
@@ -210,5 +213,6 @@ bool MAX17260::read_charge_source_ok(){
 
     // The pin is actually for the charger, MAX8600, not the fuel gauge
     bool charger_ok = digitalRead(MAX17260::charger_ok_pin);
+    charger_ok = !charger_ok;  // Should return 1 for charger Ok, 0 for charger not OK
     return charger_ok;
 }
