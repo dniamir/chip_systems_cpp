@@ -123,6 +123,7 @@ void MAX17260::read_data(bool print_data) {
     MAX17260::level_percent = level_percent;
     MAX17260::level_mah = level_mah;
     MAX17260::batt_voltage = batt_voltage;
+    MAX17260::avg_current_ma = avg_current_ma;
 
     if (!print_data) {return;}
 

@@ -47,6 +47,7 @@ class MAX17260 : public Chip {
     float level_percent;
     float level_mah;
     float batt_voltage;
+    float avg_current_ma;
 
 
   private:
