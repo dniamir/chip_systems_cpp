@@ -1,6 +1,7 @@
 # include <bme680.h>
 # include <Arduino.h>
 # include <arduino_i2c.h>
+# include <logger.h>
 
 BME680::BME680(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address_in, input_protocol) {
     Chip::field_map = field_map;
@@ -14,6 +15,7 @@ BME680::BME680(ArduinoI2C input_protocol) : Chip(input_protocol) {
 };
 
 void BME680::soft_reset() {
+    LOGGER::write_to_log("BME", "SOFT RESET");
     BME680::write_field("reset", 0xB6);
 }
 

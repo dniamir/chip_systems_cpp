@@ -1,6 +1,10 @@
 # include <TSL2591.h>
 # include <Arduino.h>
 # include <arduino_i2c.h>
+# include <logger.h>
+
+// Create logger
+LOGGER logger = LOGGER();
 
 TSL2591::TSL2591() {}
 
@@ -43,11 +47,11 @@ bool TSL2591::initialize() {
     bool sensor_ok = false;
 
     if (check_val == who_am_i_val) {
-        Serial.println("TSL2591 connection was successful");
+        LOGGER::write_to_log("TSL", "SUCCESSFUL CONNECTION");
         sensor_ok = true;
     }
     else{
-        Serial.println("TSL2591 connection was NOT successful");
+        LOGGER::write_to_log("TSL", "CONNECTION FAILED");
         sensor_ok = false;
     }
 

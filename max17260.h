@@ -30,8 +30,8 @@ class MAX17260 : public Chip {
     float read_temperature(bool avg=false);
 
     float read_batt_voltage();
-    bool read_charger_pok();
-    bool read_charger_status();
+    bool read_charger_pok(bool debug);
+    bool read_charger_status(bool debug);
 
     void read_data(bool print_data);
 

@@ -1,6 +1,7 @@
 # include <max17260.h>
 # include <Arduino.h>
 # include <arduino_i2c.h>
+# include <logger.h>
 
 MAX17260::MAX17260(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address_in, input_protocol) {
     Chip::field_map = field_map;
@@ -24,6 +25,8 @@ bool MAX17260::check_por() {
 }
 
 void MAX17260::configure_system() {
+
+    LOGGER::write_to_log("MAXB", "CONFIGURE SYSTEM");
 
     uint16_t DesignCap = 2000;  // mAh
     uint16_t IchgTerm = 10;  // mA
@@ -127,27 +130,15 @@ void MAX17260::read_data(bool print_data) {
 
     if (!print_data) {return;}
 
-    Serial.print("Fuel Gauge: ");
-    Serial.print((float)level_10_percent / 10);
-    Serial.print("%, ");
-    Serial.print((float)level_10_mah / 10);
-    Serial.print("mAh, ");
-    Serial.print(time_to_empty);
-    Serial.print("s, ");
-    Serial.print(time_to_full);
-    Serial.print("s, ");
-    Serial.print((float)current_ua / 1000);
-    Serial.print("mA, ");
-    Serial.print((float)avg_current_ua / 1000);
-    Serial.print("mA, ");
-    Serial.print(temperature);
-    Serial.print("degC, ");
-    Serial.print(avg_temperature);
-    Serial.print("degC, ");
-    Serial.print((float)batt_10_voltage / 10);
-    Serial.print("V");
-    Serial.println();
-
+    LOGGER::write_to_log("MAXB_LVL_%", level_10_percent / 10);
+    LOGGER::write_to_log("MAXB_LVL_V", batt_10_voltage / 10);
+    LOGGER::write_to_log("MAXB_LVL_mAh", level_10_mah / 10);
+    LOGGER::write_to_log("MAXB_TTE", (int32_t)time_to_empty);
+    LOGGER::write_to_log("MAXB_TTF", (int32_t)time_to_full);
+    LOGGER::write_to_log("MAXB_CURR_UA", current_ua / 1000);
+    LOGGER::write_to_log("MAXB_ACURR_UA", avg_current_ua / 1000);
+    LOGGER::write_to_log("MAXB_T", (int32_t)temperature);
+    LOGGER::write_to_log("MAXB_AT", (int32_t)avg_temperature);
 }
 
 uint16_t MAX17260::read_field16(String field) {
@@ -210,18 +201,20 @@ void MAX17260::write_field16(uint8_t field, uint16_t field_val, uint8_t offset, 
     MAX17260::write_field(field, field_write);
 }
 
-bool MAX17260::read_charger_pok(){
+bool MAX17260::read_charger_pok(bool debug){
 
     // The pin is actually for the charger, MAX8600, not the fuel gauge
     bool charger_ok = digitalRead(MAX17260::charger_pok_pin);
     charger_ok = !charger_ok;  // Should return 1 for charger Ok, 0 for charger not OK
+    LOGGER::write_to_log("MAXB_POK", charger_ok);
     return charger_ok;
 }
 
-bool MAX17260::read_charger_status(){
+bool MAX17260::read_charger_status(bool debug){
 
     // The pin is actually for the charger, MAX8600, not the fuel gauge
     bool charger_status = digitalRead(MAX17260::charger_status_pin);
     charger_status = !charger_status;  // Goes low when charger is not in prequal, top-off, or disabled
+    LOGGER::write_to_log("MAXB_STS", charger_status);
     return charger_status;
 }
