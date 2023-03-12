@@ -44,10 +44,10 @@ class MAX17260 : public Chip {
     uint16_t read_field16(uint8_t field, uint8_t offset, uint8_t field_length);
 
     // Save important battery readings
-    float level_percent;
-    float level_mah;
-    float batt_voltage;
-    float avg_current_ma;
+    int16_t level_10_percent;
+    int16_t level_10_mah;
+    int16_t batt_10_voltage;
+    int32_t avg_current_ua;
 
 
   private:

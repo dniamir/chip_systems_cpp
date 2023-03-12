@@ -109,42 +109,42 @@ float MAX17260::read_temperature(bool avg) {
 
 void MAX17260::read_data(bool print_data) {
 
-    float level_percent = MAX17260::read_level_percent();
-    float level_mah = MAX17260::read_level_mahrs();
+    int16_t level_10_percent = MAX17260::read_level_percent() * 10;
+    int16_t level_10_mah = MAX17260::read_level_mahrs() * 10;
     float time_to_empty = MAX17260::read_tte();
     float time_to_full = MAX17260::read_ttf();
-    float batt_voltage = MAX17260::read_batt_voltage();
+    int16_t batt_10_voltage = MAX17260::read_batt_voltage() * 10;
 
-    float current_ma = MAX17260::read_current(false) / 1e3;
-    float avg_current_ma = MAX17260::read_current(true) / 1e3;
+    int32_t current_ua = MAX17260::read_current(false);
+    int32_t avg_current_ua = MAX17260::read_current(true);
     float temperature = MAX17260::read_temperature(false);
     float avg_temperature = MAX17260::read_temperature(true);
 
-    MAX17260::level_percent = level_percent;
-    MAX17260::level_mah = level_mah;
-    MAX17260::batt_voltage = batt_voltage;
-    MAX17260::avg_current_ma = avg_current_ma;
+    MAX17260::level_10_percent = level_10_percent;
+    MAX17260::level_10_mah = level_10_mah;
+    MAX17260::batt_10_voltage = batt_10_voltage;
+    MAX17260::avg_current_ua = avg_current_ua;
 
     if (!print_data) {return;}
 
     Serial.print("Fuel Gauge: ");
-    Serial.print(level_percent);
+    Serial.print((float)level_10_percent / 10);
     Serial.print("%, ");
-    Serial.print(level_mah);
+    Serial.print((float)level_10_mah / 10);
     Serial.print("mAh, ");
     Serial.print(time_to_empty);
     Serial.print("s, ");
     Serial.print(time_to_full);
     Serial.print("s, ");
-    Serial.print(current_ma);
+    Serial.print((float)current_ua / 1000);
     Serial.print("mA, ");
-    Serial.print(avg_current_ma);
+    Serial.print((float)avg_current_ua / 1000);
     Serial.print("mA, ");
     Serial.print(temperature);
     Serial.print("degC, ");
     Serial.print(avg_temperature);
     Serial.print("degC, ");
-    Serial.print(batt_voltage);
+    Serial.print((float)batt_10_voltage / 10);
     Serial.print("V");
     Serial.println();
 
