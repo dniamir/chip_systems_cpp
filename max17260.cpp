@@ -130,13 +130,13 @@ void MAX17260::read_data(bool print_data) {
 
     if (!print_data) {return;}
 
-    LOGGER::write_to_log("MAXB_LVL_%", level_10_percent / 10);
-    LOGGER::write_to_log("MAXB_LVL_V", batt_10_voltage / 10);
-    LOGGER::write_to_log("MAXB_LVL_mAh", level_10_mah / 10);
+    LOGGER::write_to_log("MAXB_LVL_%", level_10_percent, 1);
+    LOGGER::write_to_log("MAXB_LVL_V", batt_10_voltage, 1);
+    LOGGER::write_to_log("MAXB_LVL_mAh", level_10_mah, 1);
     LOGGER::write_to_log("MAXB_TTE", (int32_t)time_to_empty);
     LOGGER::write_to_log("MAXB_TTF", (int32_t)time_to_full);
-    LOGGER::write_to_log("MAXB_CURR_UA", current_ua / 1000);
-    LOGGER::write_to_log("MAXB_ACURR_UA", avg_current_ua / 1000);
+    LOGGER::write_to_log("MAXB_CURR_MA", current_ua, 3);
+    LOGGER::write_to_log("MAXB_ACURR_MA", avg_current_ua, 3);
     LOGGER::write_to_log("MAXB_T", (int32_t)temperature);
     LOGGER::write_to_log("MAXB_AT", (int32_t)avg_temperature);
 }

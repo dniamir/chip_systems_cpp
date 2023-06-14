@@ -2,6 +2,8 @@
 # include <SD.h>
 # include <Arduino.h>
 # include <stdio.h>
+#include <iostream>
+#include <string>
 
 LOGGER::LOGGER() {}
 
@@ -59,60 +61,67 @@ void LOGGER::flush_log() {
 
 // }
 
-void LOGGER::write_to_log(uint32_t timestamp, const std::string &log_type, const std::string &log_value) {
+void LOGGER::write_to_log(uint32_t timestamp, const std::string &log_type, const std::string &log_value, uint8_t decimals) {
+    
+    std::string print_string = log_value;
+    uint8_t string_length = print_string.length();
+    if(decimals != 0) {
+        print_string.insert(string_length - decimals, ".");
+    }
+        
     char log_value_char[40] = "";
-    snprintf(log_value_char, 40, "LOG: %i :: %s :: %s", timestamp, log_type.c_str(), log_value.c_str());
+    snprintf(log_value_char, 40, "LOG: %i :: %s :: %s", timestamp, log_type.c_str(), print_string.c_str());
     Serial.println(log_value_char);
 }
 
-void LOGGER::write_to_log(uint32_t timestamp, const std::string &log_type, const int32_t &log_value) {
-    char log_value_char[10] = "";
-    snprintf (log_value_char, 10, "%i", log_value);
-    LOGGER::write_to_log(timestamp, log_type, log_value_char);
+void LOGGER::write_to_log(uint32_t timestamp, const std::string &log_type, const int32_t &log_value, uint8_t decimals) {
+    char log_value_char[40] = "";
+    snprintf (log_value_char, 40, "%i", log_value);
+    LOGGER::write_to_log(timestamp, log_type, log_value_char, decimals);
 }
 
 // void LOGGER::write_to_log(int timestamp, const char log_type[4], const std::string log_value) {
 //     LOGGER::write_to_log(timestamp, log_type, log_value.c_str());
 // }
 
-void LOGGER::write_to_log(const std::string &log_type, const int32_t &log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, log_value);
+void LOGGER::write_to_log(const std::string &log_type, const int32_t &log_value, uint8_t decimals) {
+    LOGGER::write_to_log((uint32_t)millis(), log_type, log_value, decimals);
 }
 
-void LOGGER::write_to_log(const std::string &log_type, const int16_t &log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t&)log_value);
+void LOGGER::write_to_log(const std::string &log_type, const int16_t &log_value, uint8_t decimals) {
+    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t)log_value, decimals);
 }
 
-void LOGGER::write_to_log(const std::string &log_type, const int8_t &log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t&)log_value);
+void LOGGER::write_to_log(const std::string &log_type, const int8_t &log_value, uint8_t decimals) {
+    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t)log_value, decimals);
 }
 
-void LOGGER::write_to_log(const std::string &log_type, const uint32_t &log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t&)log_value);
+void LOGGER::write_to_log(const std::string &log_type, const uint32_t &log_value, uint8_t decimals) {
+    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t)log_value, decimals);
 }
 
-void LOGGER::write_to_log(const std::string &log_type, const uint16_t &log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t&)log_value);
+void LOGGER::write_to_log(const std::string &log_type, const uint16_t &log_value, uint8_t decimals) {
+    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t)log_value, decimals);
 }
 
-void LOGGER::write_to_log(const std::string &log_type, const uint8_t &log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t&)log_value);
+void LOGGER::write_to_log(const std::string &log_type, const uint8_t &log_value, uint8_t decimals) {
+    LOGGER::write_to_log((uint32_t)millis(), log_type, (int32_t)log_value, decimals);
 }
 
 void LOGGER::write_to_log(const std::string &log_type, const std::string &log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, log_value);
+    LOGGER::write_to_log((uint32_t)millis(), log_type, log_value, 0);
 }
 
 void LOGGER::write_to_log(const std::string &log_type, const char *log_value) {
-    LOGGER::write_to_log((uint32_t)millis(), log_type, log_value);
+    LOGGER::write_to_log((uint32_t)millis(), log_type, log_value, 0);
 }
 
 void LOGGER::write_to_log(const std::string &log_type, const bool &log_value) {
     if(log_value) {
-        LOGGER::write_to_log((uint32_t)millis(), log_type, (int8_t)1);
+        LOGGER::write_to_log((uint32_t)millis(), log_type, (int8_t)1, 0);
     }
     else {
-        LOGGER::write_to_log((uint32_t)millis(), log_type, (int8_t)0);
+        LOGGER::write_to_log((uint32_t)millis(), log_type, (int8_t)0, 0);
     }
 }
 

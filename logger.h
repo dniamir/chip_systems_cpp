@@ -15,18 +15,18 @@ class LOGGER {
     // Overloading log write functions
     // static void write_to_log(int timestamp, const char log_type[4], const char* log_value);
     // static void write_to_log(int timestamp, const char log_type[4], const char* log_value);
-    static void write_to_log(uint32_t timestamp, const std::string &log_type, const std::string &log_value);
-    static void write_to_log(uint32_t timestamp, const std::string &log_type, const int32_t &log_value);
-    static void write_to_log(uint32_t timestamp, const std::string &log_type, const int16_t &log_value);
+    static void write_to_log(uint32_t timestamp, const std::string &log_type, const std::string &log_value, uint8_t decimals=0);
+    static void write_to_log(uint32_t timestamp, const std::string &log_type, const int32_t &log_value, uint8_t decimals=0);
+    static void write_to_log(uint32_t timestamp, const std::string &log_type, const int16_t &log_value, uint8_t decimals=0);
 
     // static void write_to_log(const char log_type[4], const char* log_value);
     static void write_to_log(const std::string &log_type, const std::string &log_value);
-    static void write_to_log(const std::string &log_type, const int32_t &log_value);
-    static void write_to_log(const std::string &log_type, const int16_t &log_value);
-    static void write_to_log(const std::string &log_type, const int8_t &log_value);
-    static void write_to_log(const std::string &log_type, const uint32_t &log_value);
-    static void write_to_log(const std::string &log_type, const uint16_t &log_value);
-    static void write_to_log(const std::string &log_type, const uint8_t &log_value);
+    static void write_to_log(const std::string &log_type, const int32_t &log_value, uint8_t decimals=0);
+    static void write_to_log(const std::string &log_type, const int16_t &log_value, uint8_t decimals=0);
+    static void write_to_log(const std::string &log_type, const int8_t &log_value, uint8_t decimals=0);
+    static void write_to_log(const std::string &log_type, const uint32_t &log_value, uint8_t decimals=0);
+    static void write_to_log(const std::string &log_type, const uint16_t &log_value, uint8_t decimals=0);
+    static void write_to_log(const std::string &log_type, const uint8_t &log_value, uint8_t decimals=0);
     static void write_to_log(const std::string &log_type, const char *log_value);
     static void write_to_log(const std::string &log_type, const bool &log_value);
 
