@@ -6,12 +6,24 @@
 MAX17260::MAX17260(int i2c_address_in, ArduinoI2C input_protocol) : Chip(i2c_address_in, input_protocol) {
     Chip::field_map = field_map;
     Chip::who_am_i_reg = who_am_i_reg;
+    MAX17260::charger_pok = false;
+    MAX17260::charger_status = false;
+    MAX17260::level_10_percent = 0;
+    MAX17260::level_10_mah = 0;
+    MAX17260::batt_10_voltage = 0;
+    MAX17260::avg_current_ua = 0;
 };
 
 MAX17260::MAX17260(ArduinoI2C input_protocol) : Chip(input_protocol) {
     Chip::field_map = field_map;
     Chip::who_am_i_reg = who_am_i_reg;
     Chip::i2c_address = MAX17260::i2c_address;
+    MAX17260::charger_pok = false;
+    MAX17260::charger_status = false;
+    MAX17260::level_10_percent = 0;
+    MAX17260::level_10_mah = 0;
+    MAX17260::batt_10_voltage = 0;
+    MAX17260::avg_current_ua = 0;
 };
 
 void MAX17260::soft_reset() {
@@ -204,17 +216,17 @@ void MAX17260::write_field16(uint8_t field, uint16_t field_val, uint8_t offset, 
 bool MAX17260::read_charger_pok(bool debug){
 
     // The pin is actually for the charger, MAX8600, not the fuel gauge
-    bool charger_ok = digitalRead(MAX17260::charger_pok_pin);
-    charger_ok = !charger_ok;  // Should return 1 for charger Ok, 0 for charger not OK
-    LOGGER::write_to_log("MAXB_POK", charger_ok);
-    return charger_ok;
+    bool charger_pok = digitalRead(MAX17260::charger_pok_pin);
+    MAX17260::charger_pok = !charger_pok;  // Should return 1 for charger Ok, 0 for charger not OK
+    LOGGER::write_to_log("MAXB_POK", MAX17260::charger_pok);
+    return MAX17260::charger_pok;
 }
 
 bool MAX17260::read_charger_status(bool debug){
 
     // The pin is actually for the charger, MAX8600, not the fuel gauge
     bool charger_status = digitalRead(MAX17260::charger_status_pin);
-    charger_status = !charger_status;  // Goes low when charger is not in prequal, top-off, or disabled
-    LOGGER::write_to_log("MAXB_STS", charger_status);
-    return charger_status;
+    MAX17260::charger_status = !charger_status;  // Goes low when charger is not in prequal, top-off, or disabled
+    LOGGER::write_to_log("MAXB_STS", MAX17260::charger_status);
+    return MAX17260::charger_status;
 }

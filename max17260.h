@@ -11,9 +11,12 @@ class MAX17260 : public Chip {
     MAX17260(ArduinoI2C input_protocol);
     MAX17260(int i2c_address_in, ArduinoI2C input_protocol);
 
-    int i2c_address = 0x36;
-    int charger_pok_pin;
-    int charger_status_pin;
+    uint8_t i2c_address = 0x36;
+    uint8_t charger_pok_pin;
+    uint8_t charger_status_pin;
+
+    bool charger_pok;
+    bool charger_status;
 
     // WHO AM I register - register the check upon startup
     Field who_am_i_reg = Field{0x21, 0, 8, false};
